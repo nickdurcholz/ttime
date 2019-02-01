@@ -11,4 +11,4 @@ packages/*
 .vs/
 *.lock.json
 .vscode/
-ttime/Properties/launchSettings.json
+launchSettings.json
