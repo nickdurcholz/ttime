@@ -37,6 +37,7 @@ namespace ttime
                 {
                     c.Storage = new Storage(_db);
                     c.Out = Console.Out;
+                    c.Error = Console.Error;
                 }
 
                 var requestedCommandName = args.Length > 0 ? args[0] : "help";

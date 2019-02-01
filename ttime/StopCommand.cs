@@ -16,10 +16,10 @@ namespace ttime
                 {
                     timeFound = DateTime.TryParse(arg, out time);
                     if (!timeFound)
-                        Out.WriteLine($"Unrecognized argument: {arg}");
+                        Error.WriteLine($"Unrecognized argument: {arg}");
                 }
                 else
-                    Out.WriteLine($"Unrecognized argument: {arg}");
+                    Error.WriteLine($"Unrecognized argument: {arg}");
             }
 
             if (time == default)

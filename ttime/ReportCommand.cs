@@ -27,18 +27,19 @@ namespace ttime
                     periodFound = Enum.TryParse(arg, true, out period);
                     if (periodFound) continue;
                 }
-                else if (arg.StartsWith("from="))
+
+                if (arg.StartsWith("from="))
                 {
                     if (arg.Length == 5)
                     {
-                        Out.WriteLine("Invalid from date: " + arg);
+                        Error.WriteLine("Invalid from date: " + arg);
                         valid = false;
                         continue;
                     }
 
                     if (!DateTime.TryParse(arg.Substring(5), out fromDate))
                     {
-                        Out.WriteLine("Invalid from date: " + arg);
+                        Error.WriteLine("Invalid from date: " + arg);
                         valid = false;
                         continue;
                     }
@@ -50,14 +51,14 @@ namespace ttime
                 {
                     if (arg.Length == 5)
                     {
-                        Out.WriteLine("Invalid to date: " + arg);
+                        Error.WriteLine("Invalid to date: " + arg);
                         valid = false;
                         continue;
                     }
 
                     if (!DateTime.TryParse(arg.Substring(5), out toDate))
                     {
-                        Out.WriteLine("Invalid to date: " + arg);
+                        Error.WriteLine("Invalid to date: " + arg);
                         valid = false;
                         continue;
                     }
@@ -69,21 +70,21 @@ namespace ttime
                 {
                     if (formatFound)
                     {
-                        Out.WriteLine("Duplicate format specification found: " + arg);
+                        Error.WriteLine("Duplicate format specification found: " + arg);
                         valid = false;
                         continue;
                     }
 
                     if (arg.Length == 7)
                     {
-                        Out.WriteLine("Invalid format: " + arg);
+                        Error.WriteLine("Invalid format: " + arg);
                         valid = false;
                         continue;
                     }
 
                     if (!Enum.TryParse(arg.Substring(7), true, out format))
                     {
-                        Out.WriteLine("Invalid format: " + arg);
+                        Error.WriteLine("Invalid format: " + arg);
                         valid = false;
                         continue;
                     }
@@ -94,14 +95,14 @@ namespace ttime
                 {
                     if (outFile != null)
                     {
-                        Out.WriteLine("Duplicate output specification found: " + arg);
+                        Error.WriteLine("Duplicate output specification found: " + arg);
                         valid = false;
                         continue;
                     }
 
                     if (arg.Length == 4)
                     {
-                        Out.WriteLine("Invalid output specification: " + arg);
+                        Error.WriteLine("Invalid output specification: " + arg);
                         valid = false;
                         continue;
                     }
@@ -153,7 +154,7 @@ namespace ttime
         {
             Out.WriteLine("usage: ttime report [day-of-week | last-week | yesterday | today |");
             Out.WriteLine("                    date | from=date-time [to=date-time]]");
-            Out.WriteLine("                    [format=text|csv|xml|json] [tag] [out=<file>]");
+            Out.WriteLine("                    [format=text|csv|xml|json] [out=<file>] [tag]...");
             Out.WriteLine();
             Out.WriteLine("    Print a report of how time was spent for a given period. When");
             Out.WriteLine("    invoked without specifying a period, the default period specified");

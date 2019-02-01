@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace ttime
@@ -23,5 +24,7 @@ namespace ttime
         }
 
         public abstract void Write(Report report, TextWriter @out);
+
+        public abstract void Write(IEnumerable<TimeEntry> entries, TextWriter @out);
     }
 }

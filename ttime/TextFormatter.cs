@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -39,6 +40,11 @@ namespace ttime
                     @out.Write(' ');
                 @out.WriteLine(report.Total.ToString("N"));
             }
+        }
+
+        public override void Write(IEnumerable<TimeEntry> entries, TextWriter @out)
+        {
+            throw new NotImplementedException();
         }
     }
 }

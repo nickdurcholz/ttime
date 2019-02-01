@@ -6,12 +6,12 @@ namespace ttime
     {
         public override void Run(Span<string> args)
         {
-            throw new NotImplementedException();
+            Error.WriteLine("Not implemented");
         }
 
         public override void PrintUsage()
         {
-            throw new NotImplementedException();
+            Error.WriteLine("Not implemented");
         }
 
         public override string Name => "import";

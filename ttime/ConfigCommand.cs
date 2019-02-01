@@ -6,12 +6,12 @@ namespace ttime
     {
         public override void Run(Span<string> args)
         {
-            Out.WriteLine("Not implemented");
+            Error.WriteLine("Not implemented");
         }
 
         public override void PrintUsage()
         {
-            Out.WriteLine("Not implemented");
+            Error.WriteLine("Not implemented");
         }
 
         public override string Name => "config";
