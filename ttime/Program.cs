@@ -35,7 +35,7 @@ namespace ttime
             {
                 foreach (var c in AvailableCommands)
                 {
-                    c.Db = _db;
+                    c.Storage = new Storage(_db);
                     c.Out = Console.Out;
                 }
 
@@ -80,7 +80,7 @@ namespace ttime
             }
             else
             {
-                dbFolder = Path.GetFileName(dbPath);
+                dbFolder = Path.GetDirectoryName(dbPath);
             }
 
             if (!Directory.Exists(dbFolder))

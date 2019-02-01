@@ -24,11 +24,10 @@ namespace ttime
                 var arg = args[i];
                 if (!periodFound)
                 {
-                    periodFound = Enum.TryParse(arg, out period);
+                    periodFound = Enum.TryParse(arg, true, out period);
                     if (periodFound) continue;
                 }
-
-                if (arg.StartsWith("from="))
+                else if (arg.StartsWith("from="))
                 {
                     if (arg.Length == 5)
                     {
@@ -47,8 +46,7 @@ namespace ttime
                     periodFound = true;
                     period = ReportingPeriod.Custom;
                 }
-
-                if (arg.StartsWith("to="))
+                else if (arg.StartsWith("to="))
                 {
                     if (arg.Length == 5)
                     {
@@ -63,11 +61,11 @@ namespace ttime
                         valid = false;
                         continue;
                     }
+
                     periodFound = true;
                     period = ReportingPeriod.Custom;
                 }
-
-                if (arg.StartsWith("format="))
+                else if (arg.StartsWith("format="))
                 {
                     if (formatFound)
                     {
@@ -83,7 +81,7 @@ namespace ttime
                         continue;
                     }
 
-                    if (!Enum.TryParse(arg.Substring(7), out format))
+                    if (!Enum.TryParse(arg.Substring(7), true, out format))
                     {
                         Out.WriteLine("Invalid format: " + arg);
                         valid = false;
@@ -92,8 +90,7 @@ namespace ttime
 
                     formatFound = true;
                 }
-
-                if (arg.StartsWith("out="))
+                else if (arg.StartsWith("out="))
                 {
                     if (outFile != null)
                     {
@@ -111,20 +108,24 @@ namespace ttime
 
                     outFile = arg.Substring(4);
                 }
-
-                tags.Add(arg);
+                else
+                {
+                    tags.Add(arg);
+                }
             }
 
             if (!valid)
                 return;
 
-            Configuration config = new Configuration(Db);
+            Configuration config = new Configuration(Storage);
             if (!periodFound)
                 period = config.DefaultReportingPeriod;
             if (!formatFound)
                 format = config.DefaultFormat;
+            if (toDate == default)
+                toDate = DateTime.Now;
 
-            var calculator = new ReportCalculator(Db, period, fromDate, toDate, tags);
+            var calculator = new ReportCalculator(Storage, period, fromDate, toDate, tags, config.StartOfWeek);
             var formatter = Formatter.Create(format);
 
             var report = calculator.CreateReport();

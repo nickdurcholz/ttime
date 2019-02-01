@@ -13,7 +13,7 @@ namespace ttime
         public abstract string Name { get; }
 
         public abstract string Description { get; }
-        public LiteDatabase Db { get; set; }
+        public Storage Storage { get; set; }
         public TextWriter Out { get; set; }
     }
 }

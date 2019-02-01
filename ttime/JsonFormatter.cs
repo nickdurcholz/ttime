@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace ttime
 {
@@ -7,7 +8,7 @@ namespace ttime
     {
         public override void Write(Report report, TextWriter @out)
         {
-            throw new NotImplementedException();
+            @out.WriteLine(JsonConvert.SerializeObject(report, Formatting.Indented));
         }
     }
 }

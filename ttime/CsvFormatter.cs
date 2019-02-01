@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using Csv;
 
 namespace ttime
 {
@@ -7,7 +9,10 @@ namespace ttime
     {
         public override void Write(Report report, TextWriter @out)
         {
-            throw new NotImplementedException();
+            CsvWriter.Write(
+                @out,
+                new [] {"Task","Hours"},
+                report.Items.Select(i => new [] { i.Name, i.Hours.ToString("F")}));
         }
     }
 }

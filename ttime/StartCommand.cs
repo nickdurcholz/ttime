@@ -24,15 +24,10 @@ namespace ttime
                 tags.Add(arg);
             }
 
-            if (tags.Count == 0)
-                tags.Add("Unspecified");
-
             if (time == default)
                 time = DateTime.Now;
 
-            var collection = Db.GetCollection<TimeEntry>("log");
-            collection.EnsureIndex(e => e.Time);
-            collection.Insert(new TimeEntry
+            Storage.Save(new TimeEntry
             {
                 Stopped = false,
                 Tags = tags.ToArray(),

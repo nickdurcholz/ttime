@@ -25,9 +25,7 @@ namespace ttime
             if (time == default)
                 time = DateTime.Now;
 
-            var collection = Db.GetCollection<TimeEntry>("log");
-            collection.EnsureIndex(e => e.Time);
-            collection.Insert(new TimeEntry
+            Storage.Save(new TimeEntry
             {
                 Stopped = true,
                 Tags = new string[0],

@@ -2,21 +2,20 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using LiteDB;
 
 namespace ttime
 {
     public class Configuration
     {
-        private readonly LiteDatabase _db;
+        private readonly Storage _storage;
         private ReportingPeriod _defaultReportingPeriod;
         private Format _defaultFormat;
         private DayOfWeek _startOfWeek;
         private decimal _roundingPrecision;
 
-        public Configuration(LiteDatabase db)
+        public Configuration(Storage storage)
         {
-            _db = db;
+            _storage = storage;
             List<ConfigSetting> settings;
 
             string GetValue(string name, string defaultValue = null)
@@ -25,9 +24,7 @@ namespace ttime
                 return setting?.Value ?? defaultValue;
             }
 
-            var collection = GetCollection();
-            collection.EnsureIndex(c => c.Name, unique: true);
-            settings = collection.FindAll().ToList();
+            settings = storage.ListConfigSettings();
 
             var value = GetValue("defaultReportPeriod");
             if (!Enum.TryParse(value, true, out _defaultReportingPeriod))
@@ -88,22 +85,9 @@ namespace ttime
 
         private void Store(string name, string value)
         {
-            var collection = GetCollection();
-            var setting = collection.FindOne(s => s.Name == name) ?? new ConfigSetting {Name = name};
+            var setting = _storage.FindConfigSetting(name) ?? new ConfigSetting {Name = name};
             setting.Value = value;
-            collection.Upsert(setting);
-        }
-
-        private LiteCollection<ConfigSetting> GetCollection()
-        {
-            return _db.GetCollection<ConfigSetting>("config");
-        }
-
-        private class ConfigSetting
-        {
-            public ObjectId Id { get; set; }
-            public string Name { get; set; }
-            public string Value { get; set; }
+            _storage.Save(setting);
         }
     }
 }
