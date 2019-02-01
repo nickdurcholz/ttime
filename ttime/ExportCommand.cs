@@ -33,14 +33,14 @@ namespace ttime
                 {
                     if (arg.Length == 5)
                     {
-                        Out.WriteLine("Invalid from date: " + arg);
+                        Error.WriteLine("Invalid from date: " + arg);
                         valid = false;
                         continue;
                     }
 
                     if (!DateTime.TryParse(arg.Substring(5), out fromDate))
                     {
-                        Out.WriteLine("Invalid from date: " + arg);
+                        Error.WriteLine("Invalid from date: " + arg);
                         valid = false;
                         continue;
                     }
@@ -52,14 +52,14 @@ namespace ttime
                 {
                     if (arg.Length == 5)
                     {
-                        Out.WriteLine("Invalid to date: " + arg);
+                        Error.WriteLine("Invalid to date: " + arg);
                         valid = false;
                         continue;
                     }
 
                     if (!DateTime.TryParse(arg.Substring(5), out toDate))
                     {
-                        Out.WriteLine("Invalid to date: " + arg);
+                        Error.WriteLine("Invalid to date: " + arg);
                         valid = false;
                         continue;
                     }
@@ -71,21 +71,21 @@ namespace ttime
                 {
                     if (formatFound)
                     {
-                        Out.WriteLine("Duplicate format specification found: " + arg);
+                        Error.WriteLine("Duplicate format specification found: " + arg);
                         valid = false;
                         continue;
                     }
 
                     if (arg.Length == 7)
                     {
-                        Out.WriteLine("Invalid format: " + arg);
+                        Error.WriteLine("Invalid format: " + arg);
                         valid = false;
                         continue;
                     }
 
                     if (!Enum.TryParse(arg.Substring(7), true, out format))
                     {
-                        Out.WriteLine("Invalid format: " + arg);
+                        Error.WriteLine("Invalid format: " + arg);
                         valid = false;
                         continue;
                     }
@@ -96,14 +96,14 @@ namespace ttime
                 {
                     if (outFile != null)
                     {
-                        Out.WriteLine("Duplicate output specification found: " + arg);
+                        Error.WriteLine("Duplicate output specification found: " + arg);
                         valid = false;
                         continue;
                     }
 
                     if (arg.Length == 4)
                     {
-                        Out.WriteLine("Invalid output specification: " + arg);
+                        Error.WriteLine("Invalid output specification: " + arg);
                         valid = false;
                         continue;
                     }
@@ -165,9 +165,10 @@ namespace ttime
         public override void PrintUsage()
         {
             Out.WriteLine("usage: ttime export [day-of-week | last-week | yesterday | today |");
-            Out.WriteLine("                    date | from=date-time [to=date-time]]");
-            Out.WriteLine("                    [format=text|csv|xml|json] [out=<file>] [tag]...");
-
+            Out.WriteLine("                    date | week | all | from=date-time");
+            Out.WriteLine("                    [to=date-time]] [format=text|csv|xml|json]");
+            Out.WriteLine("                    [out=<file>] [tag]...");
+            Out.WriteLine();
             Out.WriteLine("    Export tracked time entries for the given period. These can be");
             Out.WriteLine("    edited and then imported.");
         }

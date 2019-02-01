@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 
@@ -15,6 +14,12 @@ namespace ttime
         public override void Write(IEnumerable<TimeEntry> entries, TextWriter @out)
         {
             @out.WriteLine(JsonConvert.SerializeObject(entries, Formatting.Indented));
+        }
+
+        public override List<TimeEntry> DeserializeEntries(TextReader reader)
+        {
+            using (JsonTextReader jtr = new JsonTextReader(reader))
+                return JsonSerializer.CreateDefault().Deserialize<List<TimeEntry>>(jtr);
         }
     }
 }

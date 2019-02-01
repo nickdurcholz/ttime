@@ -137,6 +137,8 @@ namespace ttime
                     return (DateTime.Today, DateTime.Now);
                 case ReportingPeriod.Custom:
                     return (_fromDate, _toDate);
+                case ReportingPeriod.All:
+                    return (DateTime.MinValue, DateTime.MaxValue);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(ReportingPeriod));
             }

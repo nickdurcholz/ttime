@@ -75,5 +75,15 @@ namespace ttime
             var entryTime = entry.Time;
             return TimeCollection.FindOne(e => e.Time > entryTime);
         }
+
+        public void DeleteEntry(ObjectId entryId)
+        {
+            TimeCollection.Delete(entryId);
+        }
+
+        public void Save(IEnumerable<TimeEntry> entries)
+        {
+            TimeCollection.Upsert(entries);
+        }
     }
 }

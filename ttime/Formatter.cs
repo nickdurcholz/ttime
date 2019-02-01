@@ -26,5 +26,7 @@ namespace ttime
         public abstract void Write(Report report, TextWriter @out);
 
         public abstract void Write(IEnumerable<TimeEntry> entries, TextWriter @out);
+
+        public abstract List<TimeEntry> DeserializeEntries(TextReader reader);
     }
 }

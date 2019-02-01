@@ -153,13 +153,13 @@ namespace ttime
         public override void PrintUsage()
         {
             Out.WriteLine("usage: ttime report [day-of-week | last-week | yesterday | today |");
-            Out.WriteLine("                    date | from=date-time [to=date-time]]");
-            Out.WriteLine("                    [format=text|csv|xml|json] [out=<file>] [tag]...");
+            Out.WriteLine("                    date | week | all | from=date-time");
+            Out.WriteLine("                    [to=date-time]] [format=text|csv|xml|json]");
+            Out.WriteLine("                    [out=<file>] [tag]...");
             Out.WriteLine();
             Out.WriteLine("    Print a report of how time was spent for a given period. When");
             Out.WriteLine("    invoked without specifying a period, the default period specified");
-            Out.WriteLine("    in configuration settings is used.");
-        }
+            Out.WriteLine("    in configuration settings is used.");        }
 
         public override string Name => "report";
         public override string Description => "Print a report of how you spent your time";

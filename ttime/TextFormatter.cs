@@ -46,5 +46,10 @@ namespace ttime
         {
             throw new NotImplementedException();
         }
+
+        public override List<TimeEntry> DeserializeEntries(TextReader reader)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

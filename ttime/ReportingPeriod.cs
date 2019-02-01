@@ -13,6 +13,7 @@
         Yesterday,
         Today,
         Week,
+        All,
         Custom
     }
 }
