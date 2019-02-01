@@ -1,9 +1,9 @@
 # TTime
 
-TTime is a CLI time tracker intended for people who need to track the time they spend on various tasks throughout the day. It 
+TTime is a CLI time tracker intended for people who need to track the time they spend on various tasks throughout the day. You use the `ttime start ` command to start tracking time that is optionally identified by a number of tags. Use `ttime stop` to end tracking simply start a different task using `ttime start` without issuing a stop command.
 
 ## Configuration settings
-TTIME_DATA environment can be set to override the default path to the data file at ~/.ttime/data.litedb
+TTIME_DATA environment can be set to override the default path to the data file, which is ~/.ttime/data.litedb for mac and unix and <ApplicationData>\ttime\data.litedb on Windows.
 
 All other configuration settings are stored in the ttime data file.  If a data file does not exist, one will be created for you on startup.
 
@@ -21,7 +21,7 @@ Defaults to zero, which means to not round.
 
 > `ttime config defaultReportPeriod <day-of-week | last-week | yesterday | today>`
 
-Sets the default action when you type `ttime report`
+Sets the default action when you type `ttime report`. Defaults to yesterday.
 
 > `ttime config defaultFormat <text|csv|xml|json>`
 
