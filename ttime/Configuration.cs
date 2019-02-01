@@ -10,7 +10,7 @@ namespace ttime
     {
         private readonly LiteDatabase _db;
         private ReportingPeriod _defaultReportingPeriod;
-        private ReportFormat _defaultReportFormat;
+        private Format _defaultFormat;
         private DayOfWeek _startOfWeek;
         private decimal _roundingPrecision;
 
@@ -34,8 +34,8 @@ namespace ttime
                 _defaultReportingPeriod = ReportingPeriod.Yesterday;
 
             value = GetValue("defaultFormat");
-            if (!Enum.TryParse(value, true, out _defaultReportFormat))
-                _defaultReportFormat = ReportFormat.Text;
+            if (!Enum.TryParse(value, true, out _defaultFormat))
+                _defaultFormat = Format.Text;
 
             value = GetValue("startOfWeek");
             if (!Enum.TryParse(value, true, out _startOfWeek))
@@ -56,12 +56,12 @@ namespace ttime
             }
         }
 
-        public ReportFormat DefaultReportFormat
+        public Format DefaultFormat
         {
-            get => _defaultReportFormat;
+            get => _defaultFormat;
             set
             {
-                _defaultReportFormat = value;
+                _defaultFormat = value;
                 Store("defaultFormat", value.ToString());
             }
         }

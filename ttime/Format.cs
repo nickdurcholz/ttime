@@ -1,6 +1,6 @@
 ﻿namespace ttime
 {
-    public enum ReportFormat
+    public enum Format
     {
         Text,
         Csv,

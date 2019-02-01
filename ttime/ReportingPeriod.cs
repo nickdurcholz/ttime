@@ -12,5 +12,6 @@
         LastWeek,
         Yesterday,
         Today,
+        Custom
     }
 }
