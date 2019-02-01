@@ -32,20 +32,21 @@ Defaults to `text`
 First day of the week. Defaults to `Monday`
 
 ## Usage
-### Start a new task
-> `ttime start [date-time] [<tag1> ... <tagN>]`
+Usage help and examples are provided by the tool. To see a list of available commands, type the following:
 
-### Stop tracking
-> `ttime stop [date-time]`
+> `ttime help`
 
-### Get a report of time spent
-> `ttime report [day-of-week | last-week | yesterday | today | date | from=date-time [to=date-time]] [format=text|csv|xml|json] [tag]`
+More information about a specific command can be obtained with
 
-Examples:
+> `ttime help command`
+
+### Examples:
 
 Command | Effect
 --- | ---
-`ttime report` | Show report for the default reporting period
+`ttime start <task>` | Start tracking time on the given task
+`ttime stop` | Stop tracking time. This is a bit like "clocking out"
+`ttime report` | Show report of time worked for the default reporting period
 `ttime report yesterday` | Show report for yesterday starting at 12:00 AM and stopping at 11:59:59 PM
 `ttime report last-week` | Show report for the previous full week
-`ttime report from=2019-1-25\ 9:00\ AM issue-707` | Show how much time you have spent on entries tagged with issue-707 starting at 9 AM on January 25 2019 until until now
+`ttime report from=2019-1-25T9:00 issue-707` | Show how much time you have spent on entries tagged with issue-707 starting at 9 AM on January 25 2019 until until now

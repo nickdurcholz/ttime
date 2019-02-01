@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using LiteDB;
 using FileMode = LiteDB.FileMode;
 
@@ -8,6 +10,17 @@ namespace ttime
     class Program
     {
         private static LiteDatabase _db;
+
+        public static readonly IReadOnlyList<Command> AvailableCommands = new List<Command>
+        {
+            new HelpCommand(),
+            new StartCommand(),
+            new StopCommand(),
+            new ReportCommand(),
+            new ConfigCommand(),
+            new ImportCommand(),
+            new ExportCommand(),
+        };
 
         static void Main(string[] args)
         {
@@ -20,20 +33,20 @@ namespace ttime
             });
             using (_db)
             {
-                Command command;
-                Span<string> remainingArgs;
+                foreach (var c in AvailableCommands)
+                {
+                    c.Db = _db;
+                    c.Out = Console.Out;
+                }
 
-                if (args.Length == 0)
+                var requestedCommandName = args.Length > 0 ? args[0] : "help";
+                var command = GetCommand(requestedCommandName);
+                if (command == null)
                 {
-                    command = new UsageCommand(Console.Out);
-                    remainingArgs = new Span<string>();
+                    Console.Error.WriteLine("Command not found: " + requestedCommandName);
+                    command = GetCommand("help");
                 }
-                else
-                {
-                    var action = args[0];
-                    command = GetCommand(action) ?? new UsageCommand(Console.Out);
-                    remainingArgs = args.AsSpan(1);
-                }
+                var remainingArgs = args.Length > 0 ? args.AsSpan(1) : new Span<string>();
 
                 command.Run(remainingArgs);
             }
@@ -41,15 +54,7 @@ namespace ttime
 
         public static Command GetCommand(string action)
         {
-            switch (action?.ToLowerInvariant())
-            {
-                case "start":
-                    return new StartCommand(_db);
-                case "help":
-                    return new UsageCommand(Console.Out);
-                default:
-                    return null;
-            }
+            return AvailableCommands.FirstOrDefault(c => action.EqualsIOC(c.Name));
         }
 
         private static string GetDbPath()
