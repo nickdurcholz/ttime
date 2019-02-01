@@ -10,3 +10,4 @@ packages/*
 *.nupkg
 .vs/
 *.lock.json
+.vscode/

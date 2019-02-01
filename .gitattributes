@@ -1,6 +1,7 @@
 * text=auto
 
 *.sh            eol=lf
+*.DotSettings   eol=lf
 *.cs            diff=csharp
 
 ## GRAPHICS
