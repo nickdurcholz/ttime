@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ttime
 {
@@ -6,12 +7,44 @@ namespace ttime
     {
         public override void Run(Span<string> args)
         {
-            Out.WriteLine("Not implemented");
+            DateTime time = default;
+            bool timeFound = false;
+
+            foreach (var arg in args)
+            {
+                if (!timeFound)
+                {
+                    timeFound = DateTime.TryParse(arg, out time);
+                    if (!timeFound)
+                        Out.WriteLine($"Unrecognized argument: {arg}");
+                }
+                else
+                    Out.WriteLine($"Unrecognized argument: {arg}");
+            }
+
+            if (time == default)
+                time = DateTime.Now;
+
+            var collection = Db.GetCollection<TimeEntry>("log");
+            collection.EnsureIndex(e => e.Time);
+            collection.Insert(new TimeEntry
+            {
+                Stopped = true,
+                Tags = new string[0],
+                Time = time,
+            });
         }
 
         public override void PrintUsage()
         {
-            Out.WriteLine("Not implemented");
+            Out.WriteLine("usage: ttime stop [date-time]");
+            Out.WriteLine();
+            Out.WriteLine("    Stops tracking time. Use 'start' to resume tracking.");
+            Out.WriteLine();
+            Out.WriteLine("    Dates and times are always input as local time and stored as UTC.");
+            Out.WriteLine("    They can be specified in a variety of formats recognized by .NET");
+            Out.WriteLine("    standard library. It is usually convenient to use something like");
+            Out.WriteLine("    '2019-01-26T14:00'.");
         }
 
         public override string Name => "stop";
