@@ -6,12 +6,41 @@ namespace ttime
 {
     class Program
     {
+        private static LiteDatabase _db;
+
         static void Main(string[] args)
         {
             var dbPath = GetDbPath();
-            using (var db = new LiteDatabase(dbPath))
+            _db = new LiteDatabase(dbPath);
+            using (_db)
             {
-                var configuration = new Configuration(db);
+                Command command;
+                Span<string> remainingArgs;
+
+                if (args.Length == 0)
+                {
+                    command = new UsageCommand(Console.Out);
+                    remainingArgs = new Span<string>();
+                }
+                else
+                {
+                    var action = args[0];
+                    command = GetCommand(action) ?? new UsageCommand(Console.Out);
+                    remainingArgs = args.AsSpan(1);
+                }
+
+                command.Run(remainingArgs);
+            }
+        }
+
+        public static Command GetCommand(string action)
+        {
+            switch (action?.ToLowerInvariant())
+            {
+                case "help":
+                    return new UsageCommand(Console.Out);
+                default:
+                    return null;
             }
         }
 
