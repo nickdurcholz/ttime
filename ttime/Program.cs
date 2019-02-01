@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using LiteDB;
+using FileMode = LiteDB.FileMode;
 
 namespace ttime
 {
@@ -11,7 +12,12 @@ namespace ttime
         static void Main(string[] args)
         {
             var dbPath = GetDbPath();
-            _db = new LiteDatabase(dbPath);
+            _db = new LiteDatabase(new ConnectionString
+            {
+                Filename = dbPath,
+                Mode = FileMode.Exclusive,
+                Upgrade = true,
+            });
             using (_db)
             {
                 Command command;
@@ -37,6 +43,8 @@ namespace ttime
         {
             switch (action?.ToLowerInvariant())
             {
+                case "start":
+                    return new StartCommand(_db);
                 case "help":
                     return new UsageCommand(Console.Out);
                 default:

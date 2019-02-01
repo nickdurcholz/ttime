@@ -48,4 +48,4 @@ Command | Effect
 `ttime report` | Show report for the default reporting period
 `ttime report yesterday` | Show report for yesterday starting at 12:00 AM and stopping at 11:59:59 PM
 `ttime report last-week` | Show report for the previous full week
-`ttime report from=2019-1-25 9:00 AM issue-707` | Show how much time you have spent on entries tagged with issue-707 starting at 9 AM on January 25 2019 until until now
+`ttime report from=2019-1-25\ 9:00\ AM issue-707` | Show how much time you have spent on entries tagged with issue-707 starting at 9 AM on January 25 2019 until until now
