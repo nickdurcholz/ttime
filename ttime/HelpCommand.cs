@@ -49,7 +49,7 @@ namespace ttime
                         Out.WriteLine();
                         if (i < descriptionTokens.Count - 1)
                         {
-                            for (var j = 0; j < descriptionStart; j++)
+                            for (var j = 0; j < descriptionStart + 4; j++)
                                 Out.Write(' ');
                             currentLineLength = descriptionStart;
                         }
@@ -60,7 +60,7 @@ namespace ttime
                         currentLineLength++;
                     }
                 }
-           }
+            }
         }
 
         public override string Name => "help";
