@@ -33,9 +33,7 @@ namespace ttime
             foreach (var command in Program.AvailableCommands)
             {
                 Out.Write("    ");
-                Out.Write(command.Name);
-                for (int i = command.Name.Length + 4; i < descriptionStart; i++)
-                    Out.Write(' ');
+                Out.WriteAndPad(command.Name, descriptionStart);
 
                 var descriptionTokens = descriptionSplitter.Matches(command.Description);
                 int currentLineLength = descriptionStart;

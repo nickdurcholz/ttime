@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using LiteDB;
 
 namespace ttime
@@ -16,19 +15,8 @@ namespace ttime
             _db = db;
         }
 
-        private LiteCollection<ConfigSetting> ConfigCollection
-        {
-            get
-            {
-                if (_configCollection == null)
-                {
-                    _configCollection = _db.GetCollection<ConfigSetting>("config");
-                    _configCollection.EnsureIndex(c => c.Name, true);
-                }
-
-                return _configCollection;
-            }
-        }
+        private LiteCollection<ConfigSetting> ConfigCollection =>
+            _configCollection ?? (_configCollection = _db.GetCollection<ConfigSetting>("config"));
 
         private LiteCollection<TimeEntry> TimeCollection
         {
@@ -44,14 +32,9 @@ namespace ttime
             }
         }
 
-        public ConfigSetting FindConfigSetting(string name)
+        public IEnumerable<ConfigSetting> ListConfigSettings()
         {
-            return ConfigCollection.FindOne(s => s.Name == name);
-        }
-
-        public List<ConfigSetting> ListConfigSettings()
-        {
-            return ConfigCollection.FindAll().ToList();
+            return ConfigCollection.FindAll();
         }
 
         public void Save(ConfigSetting setting)

@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace ttime
 {
     public class Configuration
     {
+        private const string DefaultReportingPeriodKey = "defaultReportPeriod";
+        private const string DefaultFormatKey = "defaultFormat";
+        private const string StartOfWeekKey = "startOfWeek";
+        private const string RoundingKey = "rounding";
+
         private readonly Storage _storage;
+        private readonly List<ConfigSetting> _settings;
         private ReportingPeriod _defaultReportingPeriod;
         private Format _defaultFormat;
         private DayOfWeek _startOfWeek;
@@ -16,31 +21,28 @@ namespace ttime
         public Configuration(Storage storage)
         {
             _storage = storage;
-            List<ConfigSetting> settings;
 
-            string GetValue(string name, string defaultValue = null)
+            string GetSetting(string name, string defaultValue = null)
             {
-                var setting = settings.FirstOrDefault(s => s.Name == name);
+                var setting = _settings.FirstOrDefault(s => s.Key == name);
+                if (setting == null)
+                    _settings.Add(new ConfigSetting {Key = name, Value = defaultValue});
                 return setting?.Value ?? defaultValue;
             }
 
-            settings = storage.ListConfigSettings();
+            _settings = storage.ListConfigSettings().ToList();
 
-            var value = GetValue("defaultReportPeriod");
-            if (!Enum.TryParse(value, true, out _defaultReportingPeriod))
-                _defaultReportingPeriod = ReportingPeriod.Yesterday;
+            var value = GetSetting(DefaultReportingPeriodKey, "Yesterday");
+            _defaultReportingPeriod = Enum.Parse<ReportingPeriod>(value, true);
 
-            value = GetValue("defaultFormat");
-            if (!Enum.TryParse(value, true, out _defaultFormat))
-                _defaultFormat = Format.Text;
+            value = GetSetting(DefaultFormatKey, "Text");
+            _defaultFormat = Enum.Parse<Format>(value, true);
 
-            value = GetValue("startOfWeek");
-            if (!Enum.TryParse(value, true, out _startOfWeek))
-                _startOfWeek = DayOfWeek.Monday;
+            value = GetSetting(StartOfWeekKey, "Monday");
+            _startOfWeek = Enum.Parse<DayOfWeek>(value, true);
 
-            value = GetValue("rounding");
-            if (!decimal.TryParse(value, out _roundingPrecision))
-                _roundingPrecision = 0m;
+            value = GetSetting(RoundingKey, "0");
+            _roundingPrecision = decimal.Parse(value);
         }
 
         public ReportingPeriod DefaultReportingPeriod
@@ -49,7 +51,7 @@ namespace ttime
             set
             {
                 _defaultReportingPeriod = value;
-                Store("defaultReportPeriod", value.ToString());
+                this[DefaultReportingPeriodKey] = value.ToString();
             }
         }
 
@@ -59,7 +61,7 @@ namespace ttime
             set
             {
                 _defaultFormat = value;
-                Store("defaultFormat", value.ToString());
+                this[DefaultFormatKey] = value.ToString();
             }
         }
 
@@ -69,7 +71,7 @@ namespace ttime
             set
             {
                 _startOfWeek = value;
-                Store("startOfWeek", value.ToString());
+                this[StartOfWeekKey] = value.ToString();
             }
         }
 
@@ -79,15 +81,47 @@ namespace ttime
             set
             {
                 _roundingPrecision = value;
-                Store("rounding", value.ToString(CultureInfo.InvariantCulture));
+                this[RoundingKey] = value.ToString("F");
             }
         }
 
-        private void Store(string name, string value)
+        public string this[string name]
         {
-            var setting = _storage.FindConfigSetting(name) ?? new ConfigSetting {Name = name};
-            setting.Value = value;
-            _storage.Save(setting);
+            get
+            {
+                var setting = _settings.SingleOrDefault(s => s.Key.EqualsIOC(name));
+                if (setting == null)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(name),
+                        $"'{name}' is not a known configuration setting");
+                }
+
+                return setting.Value;
+            }
+            set
+            {
+                var setting = _settings.SingleOrDefault(s => s.Key.EqualsIOC(name));
+                if (setting == null)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(name),
+                        $"'{name}' is not a known configuration setting");
+                }
+
+                setting.Value = value;
+                _storage.Save(setting);
+            }
+        }
+
+        public bool HasSetting(string setting)
+        {
+            return _settings.Any(s => s.Key.EqualsIOC(setting));
+        }
+
+        public IEnumerable<KeyValuePair<string, string>> Settings
+        {
+            get { return _settings.Select(s => new KeyValuePair<string, string>(s.Key, s.Value)); }
         }
     }
 }

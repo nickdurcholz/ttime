@@ -25,19 +25,13 @@ namespace ttime
                 foreach (var item in report.Items)
                 {
                     @out.Write("  ");
-                    @out.Write(item.Name);
-                    var spaces = itemWidth - item.Name.Length - 2;
-                    for (int i = 0; i < spaces; i++)
-                        @out.Write(' ');
+                    @out.WriteAndPad(item.Name, itemWidth - 2);
                     @out.WriteLine(item.Hours.ToString("N"));
                 }
 
                 @out.WriteLine();
 
-                @out.Write("  ");
-                @out.Write("Total");
-                for (int i = 0; i < itemWidth - 7; i++)
-                    @out.Write(' ');
+                @out.WriteAndPad("  Total", itemWidth);
                 @out.WriteLine(report.Total.ToString("N"));
             }
         }
