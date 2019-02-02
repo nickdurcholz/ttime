@@ -50,6 +50,8 @@ namespace ttime
             int stoppedIndex = -1;
             bool first = true;
             List<TimeEntry> result = new List<TimeEntry>();
+            while (reader.Peek() == '#')
+                reader.ReadLine();
             foreach (var line in CsvReader.Read(reader, csvOptions))
             {
                 if (first)
@@ -62,7 +64,8 @@ namespace ttime
                 }
 
                 var id = idIndex >= 0 ? line[idIndex] : null;
-                var time = DateTime.Parse(line[timeIndex]);
+                var timeString = line[timeIndex];
+                var time = string.IsNullOrEmpty(timeString) ? default : DateTime.Parse(timeString);
                 var stopped = stoppedIndex >= 0 ? line[stoppedIndex] : null;
                 var tags = new List<string>();
                 for (int i = 0; i < line.ColumnCount; i++)
