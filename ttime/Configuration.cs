@@ -7,14 +7,16 @@ namespace ttime
     public class Configuration
     {
         private const string DefaultReportingPeriodKey = "defaultReportPeriod";
-        private const string DefaultFormatKey = "defaultFormat";
+        private const string DefaultReportFormatKey = "defaultReportFormat";
+        private const string DefaultImportFormatKey = "defaultImportFormat";
         private const string StartOfWeekKey = "startOfWeek";
         private const string RoundingKey = "rounding";
 
         private readonly Storage _storage;
         private readonly List<ConfigSetting> _settings;
         private ReportingPeriod _defaultReportingPeriod;
-        private Format _defaultFormat;
+        private Format _defaultReportFormat;
+        private Format _defaultImportFormat;
         private DayOfWeek _startOfWeek;
         private decimal _roundingPrecision;
 
@@ -35,8 +37,11 @@ namespace ttime
             var value = GetSetting(DefaultReportingPeriodKey, "Yesterday");
             _defaultReportingPeriod = Enum.Parse<ReportingPeriod>(value, true);
 
-            value = GetSetting(DefaultFormatKey, "Text");
-            _defaultFormat = Enum.Parse<Format>(value, true);
+            value = GetSetting(DefaultReportFormatKey, "Text");
+            _defaultImportFormat = Enum.Parse<Format>(value, true);
+
+            value = GetSetting(DefaultImportFormatKey, "Csv");
+            _defaultImportFormat = Enum.Parse<Format>(value, true);
 
             value = GetSetting(StartOfWeekKey, "Monday");
             _startOfWeek = Enum.Parse<DayOfWeek>(value, true);
@@ -55,13 +60,23 @@ namespace ttime
             }
         }
 
-        public Format DefaultFormat
+        public Format DefaultReportFormat
         {
-            get => _defaultFormat;
+            get => _defaultReportFormat;
             set
             {
-                _defaultFormat = value;
-                this[DefaultFormatKey] = value.ToString();
+                _defaultReportFormat = value;
+                this[DefaultReportFormatKey] = value.ToString();
+            }
+        }
+
+        public Format DefaultImportFormat
+        {
+            get => _defaultImportFormat;
+            set
+            {
+                _defaultImportFormat = value;
+                this[DefaultImportFormatKey] = value.ToString();
             }
         }
 

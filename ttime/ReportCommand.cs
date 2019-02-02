@@ -122,7 +122,7 @@ namespace ttime
             if (!periodFound)
                 period = config.DefaultReportingPeriod;
             if (!formatFound)
-                format = config.DefaultFormat;
+                format = config.DefaultReportFormat;
             if (toDate == default)
                 toDate = DateTime.Now;
 

@@ -13,28 +13,38 @@ namespace ttime
         {
             CsvWriter.Write(
                 @out,
-                new[] { "Task", "Hours" },
-                report.Items.Select(i => new[] { i.Name, i.Hours.ToString("F") }));
+                new[] {"Task", "Hours"},
+                report.Items.Select(i => new[] {i.Name, i.Hours.ToString("F")}));
         }
 
         public override void Write(IEnumerable<TimeEntry> entries, TextWriter @out)
         {
-            var heads = new List<string> { "id", "time", "stopped" };
+            var heads = new List<string> {"id", "time", "stopped"};
             var data = entries.ToList();
-            var numTags = data.Count == 0 ? 0 : data.Max(e => e.Tags.Length);
+            var numTags = data.Count == 0 ? 0 : data.Where(e => e.Tags != null).Max(e => e.Tags.Length);
 
             heads.AddRange(Enumerable.Range(0, numTags).Select(i => "tag" + i));
             CsvWriter.Write(
                 @out,
                 heads.ToArray(),
                 data.Select(e =>
-                    new[] { e.Id.ToString(), e.Time.ToString("O"), e.Stopped ? "true" : "false" }.Concat(e.Tags)
-                        .ToArray()));
+                {
+                    var tagCount = e.Tags?.Length ?? 0;
+                    var row = new string[tagCount + 3];
+                    row[0] = e.Id.ToString();
+                    row[1] = e.Time.ToString("O");
+                    row[2] = e.Stopped ? "true" : "false";
+
+                    if (tagCount > 0)
+                        Array.Copy(e.Tags, 0, row, 3, tagCount);
+
+                    return row;
+                }));
         }
 
         public override List<TimeEntry> DeserializeEntries(TextReader reader)
         {
-            var csvOptions = new CsvOptions { HeaderMode = HeaderMode.HeaderPresent, TrimData = true };
+            var csvOptions = new CsvOptions {HeaderMode = HeaderMode.HeaderPresent, TrimData = true};
             int idIndex = -1;
             int timeIndex = -1;
             int stoppedIndex = -1;

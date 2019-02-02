@@ -69,6 +69,10 @@ namespace ttime
             if (!valid)
                 return;
 
+            var config = new Configuration(Storage);
+            if (!formatFound)
+                format = config.DefaultImportFormat;
+
             if (format == Format.Text)
             {
                 Error.WriteLine("The text formatter cannot be used with the import command. " +

@@ -25,7 +25,7 @@ namespace ttime
                 if (_timeCollection == null)
                 {
                     _timeCollection = _db.GetCollection<TimeEntry>("time");
-                    _timeCollection.EnsureIndex(e => e.Time);
+                    _timeCollection.EnsureIndex(e => e.Time, true);
                 }
 
                 return _timeCollection;

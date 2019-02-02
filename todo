@@ -1,8 +1,8 @@
 [] command to edit previous entry
 [] option to report on all tags instead of the first tag (opt-in to double counting)
-[] implement rounding option
-[] implement config command
-[] config option for default import/export formatter (default to csv).
+[/] implement rounding option
+[/] implement config command
+[/] config option for default import/export formatter (default to csv).
 [] review help messages. improve them.
 [] command aliases
-[] implement text formatter for export
+[/] implement text formatter for export

@@ -119,15 +119,16 @@ namespace ttime
             if (!valid)
                 return;
 
-            Configuration config = new Configuration(Storage);
+            var config = new Configuration(Storage);
             if (!periodFound)
                 period = config.DefaultReportingPeriod;
             if (!formatFound)
-                format = config.DefaultFormat;
+                format = config.DefaultImportFormat;
             if (toDate == default)
                 toDate = DateTime.Now;
 
-            var calculator = new ReportCalculator(Storage,
+            var calculator = new ReportCalculator(
+                Storage,
                 period,
                 fromDate,
                 toDate,
