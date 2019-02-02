@@ -48,7 +48,11 @@ namespace ttime
 
             value = GetSetting(RoundingKey, "0");
             _roundingPrecision = decimal.Parse(value);
+
+            Aliases = storage.ListAliases().ToList();
         }
+
+        public List<Alias> Aliases { get; set; }
 
         public ReportingPeriod DefaultReportingPeriod
         {
@@ -109,7 +113,7 @@ namespace ttime
                 {
                     throw new ArgumentOutOfRangeException(
                         nameof(name),
-                        $"'{name}' is not a known configuration setting");
+                        $"'{name}' is not a known Configuration setting");
                 }
 
                 return setting.Value;
@@ -121,7 +125,7 @@ namespace ttime
                 {
                     throw new ArgumentOutOfRangeException(
                         nameof(name),
-                        $"'{name}' is not a known configuration setting");
+                        $"'{name}' is not a known Configuration setting");
                 }
 
                 setting.Value = value;
@@ -137,6 +141,29 @@ namespace ttime
         public IEnumerable<KeyValuePair<string, string>> Settings
         {
             get { return _settings.Select(s => new KeyValuePair<string, string>(s.Key, s.Value)); }
+        }
+
+        public void SetAlias(string name, List<string> arguments)
+        {
+            var alias = Aliases.FirstOrDefault(a => a.Name.EqualsIOC(name));
+            if (alias == null)
+            {
+                alias = new Alias();
+                Aliases.Add(alias);
+            }
+            alias.Name = name;
+            alias.Args = arguments;
+            _storage.Save(alias);
+        }
+
+        public void DeleteAlias(string name)
+        {
+            var alias = Aliases.FirstOrDefault(a => a.Name.EqualsIOC(name));
+            if (alias != null)
+            {
+                Aliases.Remove(alias);
+                _storage.Delete(alias);
+            }
         }
     }
 }

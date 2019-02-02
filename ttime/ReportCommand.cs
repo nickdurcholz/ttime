@@ -118,11 +118,10 @@ namespace ttime
             if (!valid)
                 return;
 
-            Configuration config = new Configuration(Storage);
             if (!periodFound)
-                period = config.DefaultReportingPeriod;
+                period = Configuration.DefaultReportingPeriod;
             if (!formatFound)
-                format = config.DefaultReportFormat;
+                format = Configuration.DefaultReportFormat;
             if (toDate == default)
                 toDate = DateTime.Now;
 
@@ -132,8 +131,8 @@ namespace ttime
                 fromDate,
                 toDate,
                 tags,
-                config.StartOfWeek,
-                config.RoundingPrecision);
+                Configuration.StartOfWeek,
+                Configuration.RoundingPrecision);
             var formatter = Formatter.Create(format);
 
             var report = calculator.CreateReport();
@@ -166,7 +165,7 @@ namespace ttime
             Out.WriteLine();
             Out.WriteLine("    Print a report of how time was spent for a given period. When");
             Out.WriteLine("    invoked without specifying a period, the default period specified");
-            Out.WriteLine("    in configuration settings is used.");        }
+            Out.WriteLine("    in Configuration settings is used.");        }
 
         public override string Name => "report";
         public override string Description => "Print a report of how you spent your time";

@@ -9,14 +9,13 @@ namespace ttime
         {
             string setting = null;
             string value = null;
-            Configuration config = new Configuration(Storage);
 
             if (args.Length > 0)
             {
                 setting = args[0];
-                if (!config.HasSetting(setting))
+                if (!Configuration.HasSetting(setting))
                 {
-                    Error.WriteLine("Unknown configuration setting: " + setting);
+                    Error.WriteLine("Unknown Configuration setting: " + setting);
                     return;
                 }
             }
@@ -33,15 +32,15 @@ namespace ttime
 
             if (!string.IsNullOrEmpty(setting) && !string.IsNullOrEmpty(value))
             {
-                config[setting] = value;
+                Configuration[setting] = value;
             }
             else if (!string.IsNullOrEmpty(setting))
             {
-                Out.WriteLine(config[setting]);
+                Out.WriteLine(Configuration[setting]);
             }
             else
             {
-                var ls = config.Settings.ToList();
+                var ls = Configuration.Settings.ToList();
                 var width = ((ls.Max(s => s.Key.Length) / 4) + 1) * 4;
                 foreach (var kvp in ls)
                 {
@@ -60,7 +59,7 @@ namespace ttime
             Out.WriteLine("    print its current value. Specify both a setting and a value to change a");
             Out.WriteLine("    setting.");
             Out.WriteLine();
-            Out.WriteLine("    Known configuration settings");
+            Out.WriteLine("    Known Configuration settings");
             Out.WriteLine("    ----------------------------");
             Out.WriteLine();
             Out.WriteLine("    rounding            Controls rounding when generating reports.");

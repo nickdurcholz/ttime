@@ -69,9 +69,8 @@ namespace ttime
             if (!valid)
                 return;
 
-            var config = new Configuration(Storage);
             if (!formatFound)
-                format = config.DefaultImportFormat;
+                format = Configuration.DefaultImportFormat;
 
             if (format == Format.Text)
             {

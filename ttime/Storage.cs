@@ -9,6 +9,7 @@ namespace ttime
         private readonly LiteDatabase _db;
         private LiteCollection<ConfigSetting> _configCollection;
         private LiteCollection<TimeEntry> _timeCollection;
+        private LiteCollection<Alias> _aliasCollection;
 
         public Storage(LiteDatabase db)
         {
@@ -31,6 +32,9 @@ namespace ttime
                 return _timeCollection;
             }
         }
+
+        private LiteCollection<Alias> AliasCollection =>
+            _aliasCollection ?? (_aliasCollection = _db.GetCollection<Alias>("alias"));
 
         public IEnumerable<ConfigSetting> ListConfigSettings()
         {
@@ -67,6 +71,21 @@ namespace ttime
         public void Save(IEnumerable<TimeEntry> entries)
         {
             TimeCollection.Upsert(entries);
+        }
+
+        public IEnumerable<Alias> ListAliases()
+        {
+            return AliasCollection.FindAll();
+        }
+
+        public void Save(Alias @alias)
+        {
+            AliasCollection.Upsert(@alias);
+        }
+
+        public void Delete(Alias @alias)
+        {
+            AliasCollection.Delete(@alias.Id);
         }
     }
 }

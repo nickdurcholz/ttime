@@ -119,11 +119,10 @@ namespace ttime
             if (!valid)
                 return;
 
-            var config = new Configuration(Storage);
             if (!periodFound)
-                period = config.DefaultReportingPeriod;
+                period = Configuration.DefaultReportingPeriod;
             if (!formatFound)
-                format = config.DefaultImportFormat;
+                format = Configuration.DefaultImportFormat;
             if (toDate == default)
                 toDate = DateTime.Now;
 
@@ -133,8 +132,8 @@ namespace ttime
                 fromDate,
                 toDate,
                 tags,
-                config.StartOfWeek,
-                config.RoundingPrecision);
+                Configuration.StartOfWeek,
+                Configuration.RoundingPrecision);
             var formatter = Formatter.Create(format);
 
             var (start, end) = calculator.ExpandPeriod();

@@ -14,6 +14,7 @@ namespace ttime
 
         public abstract string Description { get; }
         public Storage Storage { get; set; }
+        public Configuration Configuration { get; set; }
         public TextWriter Out { get; set; }
         public TextWriter Error { get; set; }
         public TextReader In { get; set; }
