@@ -127,13 +127,6 @@ namespace ttime
             if (toDate == default)
                 toDate = DateTime.Now;
 
-            if (format == Format.Text)
-            {
-                Error.WriteLine("The text formatter cannot be used for import or export. " +
-                                "Please specify a different formatter with format=<xml|json|csv>.");
-                return;
-            }
-
             var calculator = new ReportCalculator(Storage,
                 period,
                 fromDate,
