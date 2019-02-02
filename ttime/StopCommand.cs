@@ -35,7 +35,7 @@ namespace ttime
 
         public override void PrintUsage()
         {
-            Out.WriteLine("usage: ttime stop [date-time]");
+            Out.WriteLine("usage: ttime stop [<date-time>]");
             Out.WriteLine();
             Out.WriteLine("    Stops tracking time. Use 'start' to resume tracking.");
             Out.WriteLine();

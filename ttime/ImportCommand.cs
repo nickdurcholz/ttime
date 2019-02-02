@@ -106,7 +106,7 @@ namespace ttime
 
         public override void PrintUsage()
         {
-            Out.WriteLine("usage: ttime import format=<csv|xml|json> [file=<file>]");
+            Out.WriteLine("usage: ttime import format=csv|xml|json [file=<file>]");
             Out.WriteLine();
             Out.WriteLine("    Import tracked time entries. This supports a workflow to correct");
             Out.WriteLine("    mistakes. You can use the export command to export data for a");

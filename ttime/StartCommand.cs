@@ -37,7 +37,7 @@ namespace ttime
 
         public override void PrintUsage()
         {
-            Out.WriteLine("usage: ttime start [date-time] [<tag1> ... <tagN>]");
+            Out.WriteLine("usage: ttime start [<date-time>] [<tag>...]");
             Out.WriteLine();
             Out.WriteLine("    Starts tracking time optionally tagging it with one or more tasks that you");
             Out.WriteLine("    are working on. The start time is current date/time if omitted.");

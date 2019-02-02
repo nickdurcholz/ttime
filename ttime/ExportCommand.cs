@@ -165,9 +165,9 @@ namespace ttime
         public override void PrintUsage()
         {
             Out.WriteLine("usage: ttime export [day-of-week | last-week | yesterday | today |");
-            Out.WriteLine("                    date | week | all | from=date-time");
-            Out.WriteLine("                    [to=date-time]] [format=text|csv|xml|json]");
-            Out.WriteLine("                    [out=<file>] [tag]...");
+            Out.WriteLine("                    date | week | all | from=<date-time>");
+            Out.WriteLine("                    [to=<date-time>]] [format=text|csv|xml|json]");
+            Out.WriteLine("                    [out=<file>] [<tag>...]");
             Out.WriteLine();
             Out.WriteLine("    Export tracked time entries for the given period. These can be");
             Out.WriteLine("    edited and then imported.");
