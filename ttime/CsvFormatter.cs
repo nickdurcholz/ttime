@@ -35,8 +35,8 @@ namespace ttime
                     row[1] = e.Time.ToString("O");
                     row[2] = e.Stopped ? "true" : "false";
 
-                    if (tagCount > 0)
-                        Array.Copy(e.Tags, 0, row, 3, tagCount);
+                    for (int i = 0; i < tagCount; i++)
+                        row[3 + i] = e.Tags[i] ?? string.Empty;
 
                     return row;
                 }));
@@ -70,7 +70,7 @@ namespace ttime
                 var tags = new List<string>();
                 for (int i = 0; i < line.ColumnCount; i++)
                 {
-                    if (i != idIndex && i != timeIndex && i != stoppedIndex)
+                    if (i != idIndex && i != timeIndex && i != stoppedIndex && !string.IsNullOrEmpty(line[i]))
                         tags.Add(line[i]);
                 }
 

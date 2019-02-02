@@ -21,6 +21,7 @@ namespace ttime
             new ImportCommand(),
             new ExportCommand(),
             new AliasCommand(),
+            new RemoveCommand(),
         };
 
         static void Main(string[] args)
