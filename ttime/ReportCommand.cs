@@ -13,10 +13,11 @@ namespace ttime
             string outFile = null;
             DateTime fromDate = default;
             DateTime toDate = default;
-
+            ReportType reportType = default;
 
             var periodFound = false;
             var formatFound = false;
+            var typeFound = false;
             var tags = new List<string>();
             var valid = true;
             for (var i = 0; i < args.Length; i++)
@@ -91,6 +92,31 @@ namespace ttime
 
                     formatFound = true;
                 }
+                else if (arg.StartsWith("type="))
+                {
+                    if (typeFound)
+                    {
+                        Error.WriteLine("Duplicate type specification found: " + arg);
+                        valid = false;
+                        continue;
+                    }
+
+                    if (arg.Length == 5)
+                    {
+                        Error.WriteLine("Invalid type: " + arg);
+                        valid = false;
+                        continue;
+                    }
+
+                    if (!Enum.TryParse(arg.Substring(5), true, out reportType))
+                    {
+                        Error.WriteLine("Invalid type: " + arg);
+                        valid = false;
+                        continue;
+                    }
+
+                    typeFound = true;
+                }
                 else if (arg.StartsWith("out="))
                 {
                     if (outFile != null)
@@ -122,6 +148,8 @@ namespace ttime
                 period = Configuration.DefaultReportingPeriod;
             if (!formatFound)
                 format = Configuration.DefaultReportFormat;
+            if (!typeFound)
+                reportType = Configuration.DefaultReportType;
             if (toDate == default)
                 toDate = DateTime.Now;
 
@@ -132,7 +160,8 @@ namespace ttime
                 toDate,
                 tags,
                 Configuration.StartOfWeek,
-                Configuration.RoundingPrecision);
+                Configuration.RoundingPrecision,
+                reportType);
             var formatter = Formatter.Create(format);
 
             var report = calculator.CreateReport();
@@ -166,11 +195,29 @@ namespace ttime
             Out.WriteLine("usage: ttime report [day-of-week | last-week | yesterday | today |");
             Out.WriteLine("                    date | week | all | from=<date-time>");
             Out.WriteLine("                    [to=<date-time>]] [format=text|csv|xml|json]");
-            Out.WriteLine("                    [out=<file>] [tag]...");
+            Out.WriteLine("                    [type=full|first-tag] [out=<file>] [tag]...");
             Out.WriteLine();
             Out.WriteLine("    Print a report of how time was spent for a given period. When");
             Out.WriteLine("    invoked without specifying a period, the default period specified");
             Out.WriteLine("    in Configuration settings is used.");
+            Out.WriteLine();
+            Out.WriteLine("    A report type of full reports time on all tracked tags. If you started");
+            Out.WriteLine("    tracking time at 9am with the tags task1 and task2 and stopped tracking");
+            Out.WriteLine("    time at noon, then a full report would report that you worked for 3 hours");
+            Out.WriteLine("    on task1 and 3 hours on task2 and worked for a total of 3 hours. While time");
+            Out.WriteLine("    spent on individual tasks won't add up to the total if you were tracking");
+            Out.WriteLine("    time on more than one task at a time, this is desirable for some reporting");
+            Out.WriteLine("    scenarios.");
+            Out.WriteLine();
+            Out.WriteLine("    A report type of firstTag reports time on the first tracked tag for every");
+            Out.WriteLine("    entry. If you started tracking time at 9am with the tags task1 and task2");
+            Out.WriteLine("    and stopped tracking time at noon, a firstTag report would report that you");
+            Out.WriteLine("    worked 3 hours on task1 and worked for a total of 3 hours. The benefit here");
+            Out.WriteLine("    is that line items in the report will always add up to the total. You can");
+            Out.WriteLine("    still get a report of how much time you spent on task2 by explicitly");
+            Out.WriteLine("    requesting that tag.");
+            Out.WriteLine();
+            Out.WriteLine("    You can specify the default report type using 'ttime config'");
         }
 
         public override string Name => "report";

@@ -3,7 +3,7 @@
 [/] implement rounding option
 [/] implement config command
 [/] config option for default import/export formatter (default to csv).
-[] review help messages. improve them.
+[/] review help messages. improve them.
 [/] command aliases
 [/] implement text formatter for export
 [] clear command

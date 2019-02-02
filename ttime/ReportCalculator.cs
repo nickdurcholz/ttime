@@ -14,15 +14,16 @@ namespace ttime
         private readonly List<string> _tags;
         private readonly DayOfWeek _startOfWeek;
         private readonly decimal _rounding;
+        private readonly ReportType _reportType;
 
-        public ReportCalculator(
-            Storage storage,
+        public ReportCalculator(Storage storage,
             ReportingPeriod period,
             DateTime fromDate,
             DateTime toDate,
             List<string> tags,
             DayOfWeek startOfWeek,
-            decimal rounding)
+            decimal rounding,
+            ReportType reportType)
         {
             _storage = storage;
             _period = period;
@@ -31,6 +32,7 @@ namespace ttime
             _tags = tags;
             _startOfWeek = startOfWeek;
             _rounding = rounding;
+            _reportType = reportType;
         }
 
         public Report CreateReport()
@@ -41,14 +43,17 @@ namespace ttime
             var times = new Dictionary<string, long>();
             var previousTags = new List<string>();
             var previousEntry = default(TimeEntry);
+            long totalTime = 0;
             foreach (var entry in entries)
             {
                 if (previousEntry != null && !previousEntry.Stopped)
                 {
+                    var currentMs = (long)(entry.Time - previousEntry.Time).TotalMilliseconds;
+                    totalTime += currentMs;
                     foreach (var previousTag in previousTags)
                     {
                         times.TryGetValue(previousTag, out var total);
-                        total += (long)(entry.Time - previousEntry.Time).TotalMilliseconds;
+                        total += currentMs;
                         times[previousTag] = total;
                     }
                 }
@@ -57,7 +62,17 @@ namespace ttime
                 {
                     previousTags.Clear();
                     if (_tags.Count == 0)
-                        previousTags.Add(entry.Tags.Length == 0 ? "Unspecified" : entry.Tags[0]);
+                    {
+                        if (_reportType == ReportType.FirstTag)
+                            previousTags.Add(entry.Tags.Length == 0 ? "Unspecified" : entry.Tags[0]);
+                        else
+                        {
+                            if (entry.Tags.Length == 0)
+                                previousTags.Add("Unspecified");
+                            else
+                                previousTags.AddRange(entry.Tags);
+                        }
+                    }
                     else
                         previousTags.AddRange(entry.Tags.Intersect(_tags));
                 }
@@ -93,7 +108,7 @@ namespace ttime
                     Name = k,
                     Hours = RoundMillisecondsToHours(times[k]),
                 }).ToList(),
-                Total = RoundMillisecondsToHours(times.Values.Sum(x => x))
+                Total = RoundMillisecondsToHours(totalTime)
             };
         }
 

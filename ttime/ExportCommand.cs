@@ -133,7 +133,8 @@ namespace ttime
                 toDate,
                 tags,
                 Configuration.StartOfWeek,
-                Configuration.RoundingPrecision);
+                Configuration.RoundingPrecision,
+                Configuration.DefaultReportType);
             var formatter = Formatter.Create(format);
 
             var (start, end) = calculator.ExpandPeriod();

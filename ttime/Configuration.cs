@@ -8,6 +8,7 @@ namespace ttime
     {
         private const string DefaultReportingPeriodKey = "defaultReportPeriod";
         private const string DefaultReportFormatKey = "defaultReportFormat";
+        private const string DefaultReportTypeKey = "defaultReportType";
         private const string DefaultImportFormatKey = "defaultImportFormat";
         private const string StartOfWeekKey = "startOfWeek";
         private const string RoundingKey = "rounding";
@@ -19,6 +20,7 @@ namespace ttime
         private Format _defaultImportFormat;
         private DayOfWeek _startOfWeek;
         private decimal _roundingPrecision;
+        private ReportType _defaultReportType;
 
         public Configuration(Storage storage)
         {
@@ -34,16 +36,19 @@ namespace ttime
 
             _settings = storage.ListConfigSettings().ToList();
 
-            var value = GetSetting(DefaultReportingPeriodKey, "Yesterday");
+            var value = GetSetting(DefaultReportingPeriodKey, nameof(ReportingPeriod.Yesterday));
             _defaultReportingPeriod = Enum.Parse<ReportingPeriod>(value, true);
 
-            value = GetSetting(DefaultReportFormatKey, "Text");
+            value = GetSetting(DefaultReportFormatKey, nameof(Format.Text));
+            _defaultReportFormat = Enum.Parse<Format>(value, true);
+
+            value = GetSetting(DefaultReportTypeKey, nameof(ReportType.FirstTag));
+            _defaultReportType = Enum.Parse<ReportType>(value, true);
+
+            value = GetSetting(DefaultImportFormatKey, nameof(Format.Csv));
             _defaultImportFormat = Enum.Parse<Format>(value, true);
 
-            value = GetSetting(DefaultImportFormatKey, "Csv");
-            _defaultImportFormat = Enum.Parse<Format>(value, true);
-
-            value = GetSetting(StartOfWeekKey, "Monday");
+            value = GetSetting(StartOfWeekKey, nameof(DayOfWeek.Monday));
             _startOfWeek = Enum.Parse<DayOfWeek>(value, true);
 
             value = GetSetting(RoundingKey, "0");
@@ -71,6 +76,15 @@ namespace ttime
             {
                 _defaultReportFormat = value;
                 this[DefaultReportFormatKey] = value.ToString();
+            }
+        }
+        public ReportType DefaultReportType
+        {
+            get => _defaultReportType;
+            set
+            {
+                _defaultReportType = value;
+                this[DefaultReportTypeKey] = value.ToString();
             }
         }
 
