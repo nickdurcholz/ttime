@@ -126,7 +126,14 @@ namespace ttime
             if (toDate == default)
                 toDate = DateTime.Now;
 
-            var calculator = new ReportCalculator(Storage, period, fromDate, toDate, tags, config.StartOfWeek);
+            var calculator = new ReportCalculator(
+                Storage,
+                period,
+                fromDate,
+                toDate,
+                tags,
+                config.StartOfWeek,
+                config.RoundingPrecision);
             var formatter = Formatter.Create(format);
 
             var report = calculator.CreateReport();

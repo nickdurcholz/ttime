@@ -71,7 +71,8 @@ namespace ttime
 
             if (format == Format.Text)
             {
-                Error.WriteLine("The text formatter cannot be used for import or export. Please specify a different formatter with format=<xml|json|csv>.");
+                Error.WriteLine("The text formatter cannot be used for import or export. " +
+                                "Please specify a different formatter with format=<xml|json|csv>.");
                 return;
             }
 

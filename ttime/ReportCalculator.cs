@@ -13,6 +13,7 @@ namespace ttime
         private readonly DateTime _toDate;
         private readonly List<string> _tags;
         private readonly DayOfWeek _startOfWeek;
+        private readonly decimal _rounding;
 
         public ReportCalculator(
             Storage storage,
@@ -20,7 +21,8 @@ namespace ttime
             DateTime fromDate,
             DateTime toDate,
             List<string> tags,
-            DayOfWeek startOfWeek)
+            DayOfWeek startOfWeek,
+            decimal rounding)
         {
             _storage = storage;
             _period = period;
@@ -28,6 +30,7 @@ namespace ttime
             _toDate = toDate;
             _tags = tags;
             _startOfWeek = startOfWeek;
+            _rounding = rounding;
         }
 
         public Report CreateReport()
@@ -35,7 +38,7 @@ namespace ttime
             var (start, end) = ExpandPeriod();
             var entries = _storage.ListTimeEntries(start, end);
 
-            var times = new Dictionary<string, double>();
+            var times = new Dictionary<string, long>();
             var previousTags = new List<string>();
             var previousEntry = default(TimeEntry);
             foreach (var entry in entries)
@@ -45,7 +48,7 @@ namespace ttime
                     foreach (var previousTag in previousTags)
                     {
                         times.TryGetValue(previousTag, out var total);
-                        total += (entry.Time - previousEntry.Time).TotalHours;
+                        total += (long)(entry.Time - previousEntry.Time).TotalMilliseconds;
                         times[previousTag] = total;
                     }
                 }
@@ -69,7 +72,7 @@ namespace ttime
                     times.TryGetValue(previousTag, out var total);
                     var nextEntry = _storage.GetNextEntry(previousEntry);
                     var endTime = nextEntry?.Time ?? DateTime.Now;
-                    total += (endTime - previousEntry.Time).TotalHours;
+                    total += (long)(endTime - previousEntry.Time).TotalMilliseconds;
                     times[previousTag] = total;
                 }
             }
@@ -88,10 +91,20 @@ namespace ttime
                 Items = keys.Select(k => new Report.Item
                 {
                     Name = k,
-                    Hours = times[k],
+                    Hours = RoundMillisecondsToHours(times[k]),
                 }).ToList(),
-                Total = times.Values.Sum(x => x)
+                Total = RoundMillisecondsToHours(times.Values.Sum(x => x))
             };
+        }
+
+        private decimal RoundMillisecondsToHours(long ms)
+        {
+            if (_rounding == 0m)
+                return ms / 3600000m;
+
+            var roundingFactor = (long) (3600000 * _rounding);
+            ms = ms / roundingFactor * roundingFactor;
+            return ms / 3600000m;
         }
 
         public (DateTime start, DateTime end) ExpandPeriod()
