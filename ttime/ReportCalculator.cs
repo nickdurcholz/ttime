@@ -82,12 +82,14 @@ namespace ttime
 
             if (previousEntry != null && !previousEntry.Stopped)
             {
+                var nextEntry = _storage.GetNextEntry(previousEntry);
+                var endTime = nextEntry?.Time ?? DateTime.Now;
+                var currentMs = (long)(endTime - previousEntry.Time).TotalMilliseconds;
+                totalTime += currentMs;
                 foreach (var previousTag in previousTags)
                 {
                     times.TryGetValue(previousTag, out var total);
-                    var nextEntry = _storage.GetNextEntry(previousEntry);
-                    var endTime = nextEntry?.Time ?? DateTime.Now;
-                    total += (long)(endTime - previousEntry.Time).TotalMilliseconds;
+                    total += currentMs;
                     times[previousTag] = total;
                 }
             }
@@ -155,8 +157,6 @@ namespace ttime
                     int targetDay = (int) _startOfWeek;
                     int currentDay = (int) DateTime.Today.DayOfWeek;
                     int offset = currentDay - targetDay;
-                    if (offset < 1)
-                        offset += 7;
                     return (DateTime.Today.AddDays(-offset), DateTime.Now);
                 }
                 case ReportingPeriod.Yesterday:
