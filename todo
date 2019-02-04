@@ -7,3 +7,4 @@
 [/] command aliases
 [/] implement text formatter for export
 [] clear command
+[] update help for config command
