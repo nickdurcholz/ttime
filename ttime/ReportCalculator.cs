@@ -105,10 +105,14 @@ namespace ttime
             {
                 Start = start,
                 End = end,
-                Items = keys.Select(k => new Report.Item
+                Items = keys.Select(k =>
                 {
-                    Name = k,
-                    Hours = RoundMillisecondsToHours(times[k]),
+                    times.TryGetValue(k, out var ms);
+                    return new Report.Item
+                    {
+                        Name = k,
+                        Hours = RoundMillisecondsToHours(ms),
+                    };
                 }).ToList(),
                 Total = RoundMillisecondsToHours(totalTime)
             };
