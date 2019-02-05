@@ -63,10 +63,11 @@ namespace ttime
                 if (alias != null && alias.Args.Count > 1)
                 {
                     var a = new string[alias.Args.Count + remainingArgs.Length - 1];
-                    for (int i = 1; i < alias.Args.Count; i++)
-                        a[i - 1] = alias.Args[i];
-                    for (int i = alias.Args.Count; i < a.Length; i++)
-                        a[i - 1] = remainingArgs[i];
+                    int i = 0;
+                    for (var j = 1; j < alias.Args.Count; j++)
+                        a[i++] = alias.Args[j];
+                    for (var j = 0; j < remainingArgs.Length; j++)
+                        a[i++] = remainingArgs[j];
 
                     remainingArgs = a;
                 }
