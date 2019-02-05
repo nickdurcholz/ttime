@@ -166,7 +166,7 @@ namespace ttime
                 case ReportingPeriod.Yesterday:
                     return (DateTime.Today.AddDays(-1), DateTime.Today);
                 case ReportingPeriod.Today:
-                    return (DateTime.Today, DateTime.Now);
+                    return (DateTime.Today, DateTime.Today.AddDays(1));
                 case ReportingPeriod.Custom:
                     return (_fromDate, _toDate);
                 case ReportingPeriod.All:
