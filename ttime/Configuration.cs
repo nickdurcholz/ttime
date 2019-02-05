@@ -9,7 +9,7 @@ namespace ttime
         private const string DefaultReportingPeriodKey = "defaultReportPeriod";
         private const string DefaultReportFormatKey = "defaultReportFormat";
         private const string DefaultReportTypeKey = "defaultReportType";
-        private const string DefaultImportFormatKey = "defaultImportFormat";
+        private const string DefaultExportFormatKey = "defaultExportFormat";
         private const string StartOfWeekKey = "startOfWeek";
         private const string RoundingKey = "rounding";
 
@@ -17,7 +17,7 @@ namespace ttime
         private readonly List<ConfigSetting> _settings;
         private ReportingPeriod _defaultReportingPeriod;
         private Format _defaultReportFormat;
-        private Format _defaultImportFormat;
+        private Format _defaultExportFormat;
         private DayOfWeek _startOfWeek;
         private decimal _roundingPrecision;
         private ReportType _defaultReportType;
@@ -45,8 +45,8 @@ namespace ttime
             value = GetSetting(DefaultReportTypeKey, nameof(ReportType.FirstTag));
             _defaultReportType = Enum.Parse<ReportType>(value, true);
 
-            value = GetSetting(DefaultImportFormatKey, nameof(Format.Csv));
-            _defaultImportFormat = Enum.Parse<Format>(value, true);
+            value = GetSetting(DefaultExportFormatKey, nameof(Format.Csv));
+            _defaultExportFormat = Enum.Parse<Format>(value, true);
 
             value = GetSetting(StartOfWeekKey, nameof(DayOfWeek.Monday));
             _startOfWeek = Enum.Parse<DayOfWeek>(value, true);
@@ -88,13 +88,13 @@ namespace ttime
             }
         }
 
-        public Format DefaultImportFormat
+        public Format DefaultExportFormat
         {
-            get => _defaultImportFormat;
+            get => _defaultExportFormat;
             set
             {
-                _defaultImportFormat = value;
-                this[DefaultImportFormatKey] = value.ToString();
+                _defaultExportFormat = value;
+                this[DefaultExportFormatKey] = value.ToString();
             }
         }
 

@@ -41,28 +41,19 @@ namespace ttime
 
                     formatFound = true;
                 }
-                else if (arg.StartsWith("file="))
+                else
                 {
                     if (file != null)
                     {
-                        Error.WriteLine("Duplicate output specification found: " + arg);
+                        Error.WriteLine("Duplicate input file found: " + arg);
                         valid = false;
                         continue;
                     }
 
-                    if (arg.Length == 5)
-                    {
-                        Error.WriteLine("Invalid output specification: " + arg);
-                        valid = false;
-                        continue;
-                    }
+                    if (!File.Exists(arg))
+                        Error.WriteLine($"The path '{arg}' does not exist or is not a file.");
 
-                    file = arg.Substring(5);
-                }
-                else
-                {
-                    Error.WriteLine("Unexpected argument: " + arg);
-                    valid = false;
+                    file = arg;
                 }
             }
 
@@ -70,7 +61,17 @@ namespace ttime
                 return;
 
             if (!formatFound)
-                format = Configuration.DefaultImportFormat;
+            {
+                var extension = Path.GetExtension(file);
+                if (".csv".EqualsIOC(extension))
+                    format = Format.Csv;
+                else if (".xml".EqualsIOC(extension))
+                    format = Format.Xml;
+                else if (".json".EqualsIOC(extension))
+                    format = Format.Json;
+                else
+                    format = Configuration.DefaultExportFormat;
+            }
 
             if (format == Format.Text)
             {
