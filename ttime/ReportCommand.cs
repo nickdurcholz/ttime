@@ -27,6 +27,14 @@ namespace ttime
                 {
                     periodFound = Enum.TryParse(arg, true, out period);
                     if (periodFound) continue;
+
+                    periodFound = DateTime.TryParse(arg, out fromDate);
+                    if (periodFound)
+                    {
+                        toDate = fromDate.Date.AddDays(1);
+                        period = ReportingPeriod.Custom;
+                        continue;
+                    }
                 }
 
                 if (arg.StartsWith("from="))
@@ -193,7 +201,7 @@ namespace ttime
         public override void PrintUsage()
         {
             Out.WriteLine("usage: ttime report [day-of-week | last-week | yesterday | today |");
-            Out.WriteLine("                    date | week | all | from=<date-time>");
+            Out.WriteLine("                    <date> | week | all | from=<date-time>");
             Out.WriteLine("                    [to=<date-time>]] [format=text|csv|xml|json]");
             Out.WriteLine("                    [type=full|first-tag] [out=<file>] [tag]...");
             Out.WriteLine();
