@@ -152,8 +152,6 @@ namespace ttime
                     int targetDay = (int) _startOfWeek;
                     int currentDay = (int) DateTime.Today.DayOfWeek;
                     int offset = currentDay - targetDay;
-                    if (offset < 1)
-                        offset += 7;
                     return (DateTime.Today.AddDays(-offset - 7), DateTime.Today.AddDays(-offset));
                 }
                 case ReportingPeriod.Week:
@@ -161,7 +159,7 @@ namespace ttime
                     int targetDay = (int) _startOfWeek;
                     int currentDay = (int) DateTime.Today.DayOfWeek;
                     int offset = currentDay - targetDay;
-                    return (DateTime.Today.AddDays(-offset), DateTime.Now);
+                    return (DateTime.Today.AddDays(-offset), DateTime.Today.AddDays(-offset + 7));
                 }
                 case ReportingPeriod.Yesterday:
                     return (DateTime.Today.AddDays(-1), DateTime.Today);
