@@ -13,6 +13,9 @@
         Yesterday,
         Today,
         Week,
+        Month,
+        Quarter,
+        Year,
         All,
         Custom
     }

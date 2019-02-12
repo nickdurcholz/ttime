@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using LiteDB;
 
 namespace ttime
@@ -26,6 +27,17 @@ namespace ttime
 
             if (time == default)
                 time = DateTime.Now;
+
+            bool invalidTags = false;
+            foreach (var tag in tags.Where(t => Enum.TryParse<ReportingPeriod>(t, true, out _)))
+            {
+                invalidTags = true;
+                Error.WriteLine($"Invalid tag: {tag}. Cannot use the name of a reporting period.");
+            }
+
+            if (invalidTags)
+                return;
+
 
             Storage.Save(new TimeEntry
             {
