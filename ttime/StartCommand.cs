@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using LiteDB;
 
 namespace ttime
@@ -20,6 +21,25 @@ namespace ttime
                 {
                     timeFound = DateTime.TryParse(arg, out time);
                     if (timeFound) continue;
+
+                    var match = Regex.Match(arg, @"(?i)^(?<n>-?\d+(\.\d+)?)(?<unit>h|m|s)$");
+                    if (match.Success)
+                    {
+                        switch (match.Groups["unit"].Value.ToLowerInvariant())
+                        {
+                            case "h":
+                                time = DateTime.Now.AddHours(double.Parse(match.Groups["n"].Value));
+                                break;
+                            case "m":
+                                time = DateTime.Now.AddMinutes(double.Parse(match.Groups["n"].Value));
+                                break;
+                            case "s":
+                                time = DateTime.Now.AddSeconds(double.Parse(match.Groups["n"].Value));
+                                break;
+                        }
+                        timeFound = true;
+                        continue;
+                    }
                 }
 
                 tags.Add(arg);
@@ -49,7 +69,7 @@ namespace ttime
 
         public override void PrintUsage()
         {
-            Out.WriteLine("usage: ttime start [<date-time>] [<tag>...]");
+            Out.WriteLine("usage: ttime start [<date-time>|<offset>] [<tag>...]");
             Out.WriteLine();
             Out.WriteLine("    Starts tracking time optionally tagging it with one or more tasks that you");
             Out.WriteLine("    are working on. The start time is current date/time if omitted.");
@@ -57,6 +77,11 @@ namespace ttime
             Out.WriteLine("    Dates and times are always expressed as local time (not UTC), and can be");
             Out.WriteLine("    specified in a variety of formats recognized by .NET standard library. It");
             Out.WriteLine("    is usually convenient to use something like '2019-01-26T14:00'.");
+            Out.WriteLine("    You can also supply an offset instead of an explicit time to");
+            Out.WriteLine("    start the clock. Examples:");
+            Out.WriteLine();
+            Out.WriteLine("        ttime start -5m");
+            Out.WriteLine("        ttime start 1.5h");
         }
 
         public override string Name => "start";
