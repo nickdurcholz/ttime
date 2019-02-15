@@ -12,14 +12,20 @@ namespace ttime
 
             foreach (var arg in args)
             {
-                if (!timeFound)
+                if (timeFound)
+                {
+                    Error.WriteLine($"Unrecognized argument: {arg}");
+                }
+                else
                 {
                     timeFound = DateTime.TryParse(arg, out time);
+
+                    if (!timeFound)
+                        timeFound = DateTimeUtility.TryParseDateOffset(arg, DateTime.Now, out time);
+
                     if (!timeFound)
                         Error.WriteLine($"Unrecognized argument: {arg}");
                 }
-                else
-                    Error.WriteLine($"Unrecognized argument: {arg}");
             }
 
             if (time == default)

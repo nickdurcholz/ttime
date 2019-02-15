@@ -22,24 +22,8 @@ namespace ttime
                     timeFound = DateTime.TryParse(arg, out time);
                     if (timeFound) continue;
 
-                    var match = Regex.Match(arg, @"(?i)^(?<n>-?\d+(\.\d+)?)(?<unit>h|m|s)$");
-                    if (match.Success)
-                    {
-                        switch (match.Groups["unit"].Value.ToLowerInvariant())
-                        {
-                            case "h":
-                                time = DateTime.Now.AddHours(double.Parse(match.Groups["n"].Value));
-                                break;
-                            case "m":
-                                time = DateTime.Now.AddMinutes(double.Parse(match.Groups["n"].Value));
-                                break;
-                            case "s":
-                                time = DateTime.Now.AddSeconds(double.Parse(match.Groups["n"].Value));
-                                break;
-                        }
-                        timeFound = true;
-                        continue;
-                    }
+                    timeFound = DateTimeUtility.TryParseDateOffset(arg, DateTime.Now, out time);
+                    if (timeFound) continue;
                 }
 
                 tags.Add(arg);

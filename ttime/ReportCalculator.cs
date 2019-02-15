@@ -37,7 +37,7 @@ namespace ttime
 
         public Report CreateReport()
         {
-            var (start, end) = ExpandPeriod();
+            var (start, end) = DateTimeUtility.ExpandPeriod(_period, _startOfWeek, _fromDate, _toDate);
             var entries = _storage.ListTimeEntries(start, end);
 
             var times = new Dictionary<string, long>();
@@ -126,73 +126,6 @@ namespace ttime
             var roundingFactor = (long) (3600000 * _rounding);
             ms = ms / roundingFactor * roundingFactor;
             return ms / 3600000m;
-        }
-
-        /// <summary>
-        /// Get the starting date (inclusive) and the ending date (exclusive) for the reporting period. Filter entries on start &lt;= Time &lt; end.
-        /// </summary>
-        public (DateTime start, DateTime end) ExpandPeriod()
-        {
-            var today = DateTime.Today;
-            switch (_period)
-            {
-                case ReportingPeriod.Sunday:
-                case ReportingPeriod.Monday:
-                case ReportingPeriod.Tuesday:
-                case ReportingPeriod.Wednesday:
-                case ReportingPeriod.Thursday:
-                case ReportingPeriod.Friday:
-                case ReportingPeriod.Saturday:
-                {
-                    int targetDay = (int) _period;
-                    int currentDay = (int) today.DayOfWeek;
-                    int offset = currentDay - targetDay;
-                    if (offset < 1)
-                        offset += 7;
-                    return (today.AddDays(-offset), today.AddDays(1 - offset));
-                }
-                case ReportingPeriod.LastWeek:
-                {
-                    int targetDay = (int) _startOfWeek;
-                    int currentDay = (int) today.DayOfWeek;
-                    int offset = currentDay - targetDay;
-                    return (today.AddDays(-offset - 7), today.AddDays(-offset));
-                }
-                case ReportingPeriod.Week:
-                {
-                    int targetDay = (int) _startOfWeek;
-                    int currentDay = (int) today.DayOfWeek;
-                    int offset = currentDay - targetDay;
-                    return (today.AddDays(-offset), today.AddDays(-offset + 7));
-                }
-                case ReportingPeriod.Yesterday:
-                    return (today.AddDays(-1), today);
-                case ReportingPeriod.Today:
-                    return (today, today.AddDays(1));
-                case ReportingPeriod.Custom:
-                    return (_fromDate, _toDate);
-                case ReportingPeriod.All:
-                    return (DateTime.MinValue, DateTime.MaxValue);
-                case ReportingPeriod.Month:
-                    return (
-                        new DateTime(today.Year, today.Month, 1),
-                        new DateTime(today.Year + ((today.Month + 1) / 12), (today.Month + 1) % 12, 1)
-                    );
-                case ReportingPeriod.Quarter:
-                {
-                    var q = today.Month / 4;
-                    var startMonth = q * 3 + 1;
-                    var nextStartMonth = (q + 1) * 3 + 1;
-                    return (
-                        new DateTime(today.Year, startMonth, 1), 
-                        new DateTime(today.Year + (nextStartMonth / 12), nextStartMonth % 12, 1)
-                    );
-                }
-                case ReportingPeriod.Year:
-                    return (new DateTime(today.Year, 1, 1), new DateTime(today.Year + 1, 1, 1));
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(ReportingPeriod));
-            }
         }
     }
 }

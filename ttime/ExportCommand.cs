@@ -126,18 +126,9 @@ namespace ttime
             if (toDate == default)
                 toDate = DateTime.Now;
 
-            var calculator = new ReportCalculator(
-                Storage,
-                period,
-                fromDate,
-                toDate,
-                tags,
-                Configuration.StartOfWeek,
-                Configuration.RoundingPrecision,
-                Configuration.DefaultReportType);
             var formatter = Formatter.Create(format);
 
-            var (start, end) = calculator.ExpandPeriod();
+            var (start, end) = DateTimeUtility.ExpandPeriod(period, Configuration.StartOfWeek, fromDate, toDate);
             var entries = Storage.ListTimeEntries(start, end);
             if (tags.Count > 0)
             {
