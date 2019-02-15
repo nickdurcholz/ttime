@@ -107,7 +107,7 @@ namespace ttime
 
         public override void PrintUsage()
         {
-            Out.WriteLine("usage: ttime import format=csv|xml|json [file=<file>]");
+            Out.WriteLine("usage: ttime import [<file>] [format=csv|xml|json] [<file>]");
             Out.WriteLine();
             Out.WriteLine("    Import tracked time entries. This supports a workflow to correct");
             Out.WriteLine("    mistakes. You can use the export command to export data for a");
@@ -120,6 +120,12 @@ namespace ttime
             Out.WriteLine();
             Out.WriteLine("    To delete an existing entry via import, provide a null for its");
             Out.WriteLine("    date/time.");
+            Out.WriteLine();
+            Out.WriteLine("    If file is omitted, the import is read from stdin. If format is");
+            Out.WriteLine("    omitted, the format is inferred from the extension of the file if");
+            Out.WriteLine("    present, and if the format cannot be inferred from the file name,");
+            Out.WriteLine("    then the default export format specified in configuration is");
+            Out.WriteLine("    used.");
         }
 
         public override string Name => "import";
