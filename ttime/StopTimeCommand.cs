@@ -40,7 +40,7 @@ namespace ttime
 
             hours -= report.Total;
 
-            Out.WriteLine(DateTime.Now.AddMilliseconds((double)hours * 3600000));
+            Out.WriteLine(DateTime.Now.AddMilliseconds((double) hours * 3600000));
         }
 
         public override void PrintUsage()

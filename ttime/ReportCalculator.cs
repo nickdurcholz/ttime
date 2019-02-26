@@ -16,7 +16,8 @@ namespace ttime
         private readonly decimal _rounding;
         private readonly ReportType _reportType;
 
-        public ReportCalculator(Storage storage,
+        public ReportCalculator(
+            Storage storage,
             ReportingPeriod period,
             DateTime fromDate,
             DateTime toDate,
@@ -48,7 +49,7 @@ namespace ttime
             {
                 if (previousEntry != null && !previousEntry.Stopped)
                 {
-                    var currentMs = (long)(entry.Time - previousEntry.Time).TotalMilliseconds;
+                    var currentMs = (long) (entry.Time - previousEntry.Time).TotalMilliseconds;
                     totalTime += currentMs;
                     foreach (var previousTag in previousTags)
                     {
@@ -84,7 +85,7 @@ namespace ttime
             {
                 var nextEntry = _storage.GetNextEntry(previousEntry);
                 var endTime = nextEntry?.Time ?? DateTime.Now;
-                var currentMs = (long)(endTime - previousEntry.Time).TotalMilliseconds;
+                var currentMs = (long) (endTime - previousEntry.Time).TotalMilliseconds;
                 totalTime += currentMs;
                 foreach (var previousTag in previousTags)
                 {

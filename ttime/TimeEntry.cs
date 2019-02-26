@@ -8,6 +8,7 @@ namespace ttime
     {
         [JsonConverter(typeof(JsonObjectIdConverter))]
         public ObjectId Id { get; set; }
+
         public DateTime Time { get; set; }
         public bool Stopped { get; set; }
         public string[] Tags { get; set; }

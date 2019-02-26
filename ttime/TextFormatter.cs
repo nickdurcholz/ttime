@@ -55,6 +55,7 @@ namespace ttime
                             @out.Write(", ");
                     }
                 }
+
                 @out.WriteLine();
             }
         }

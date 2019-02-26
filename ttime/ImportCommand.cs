@@ -115,8 +115,8 @@ namespace ttime
             Out.WriteLine("    then import it. ttime will change existing entries to match the");
             Out.WriteLine("    import file.");
             Out.WriteLine();
-            Out.WriteLine("    To create a new entry, simply omit the id field or provide an ");
-            Out.WriteLine("    empty value for the Id.");
+            Out.WriteLine("    To create a new entry via import, simply omit the id field or ");
+            Out.WriteLine("    provide an empty value for the Id.");
             Out.WriteLine();
             Out.WriteLine("    To delete an existing entry via import, provide a null for its");
             Out.WriteLine("    date/time.");

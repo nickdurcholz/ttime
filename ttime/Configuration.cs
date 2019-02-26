@@ -30,7 +30,7 @@ namespace ttime
             {
                 var setting = _settings.FirstOrDefault(s => s.Key == name);
                 if (setting == null)
-                    _settings.Add(new ConfigSetting {Key = name, Value = defaultValue});
+                    _settings.Add(new ConfigSetting { Key = name, Value = defaultValue });
                 return setting?.Value ?? defaultValue;
             }
 
@@ -78,6 +78,7 @@ namespace ttime
                 this[DefaultReportFormatKey] = value.ToString();
             }
         }
+
         public ReportType DefaultReportType
         {
             get => _defaultReportType;
@@ -165,6 +166,7 @@ namespace ttime
                 alias = new Alias();
                 Aliases.Add(alias);
             }
+
             alias.Name = name;
             alias.Args = arguments;
             _storage.Save(alias);

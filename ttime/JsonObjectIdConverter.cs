@@ -21,7 +21,7 @@ namespace ttime
         {
             if (reader.TokenType != JsonToken.String)
             {
-                var jsonLineInfo = (IJsonLineInfo)reader;
+                var jsonLineInfo = (IJsonLineInfo) reader;
                 throw new JsonSerializationException(
                     $"Unexpected token parsing ObjectId. Expected String, got {reader.TokenType}.",
                     reader.Path,

@@ -59,6 +59,7 @@ namespace ttime
                     Console.Error.WriteLine("Command not found: " + requestedCommandName);
                     command = GetCommand("help");
                 }
+
                 var remainingArgs = args.Length > 0 ? args.AsSpan(1) : new Span<string>();
 
                 if (alias != null && alias.Args.Count > 1)

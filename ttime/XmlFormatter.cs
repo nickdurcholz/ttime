@@ -24,7 +24,8 @@ namespace ttime
                     new XAttribute("hours", item.Hours)));
             }
 
-            using (var writer = XmlWriter.Create(@out, new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true }))
+            using (var writer =
+                XmlWriter.Create(@out, new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true }))
             {
                 reportElement.WriteTo(writer);
                 writer.Flush();
@@ -47,7 +48,8 @@ namespace ttime
                 entriesElement.Add(entryElement);
             }
 
-            using (var writer = XmlWriter.Create(@out, new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true }))
+            var settings = new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true };
+            using (var writer = XmlWriter.Create(@out, settings))
             {
                 entriesElement.WriteTo(writer);
                 writer.Flush();
@@ -76,7 +78,6 @@ namespace ttime
                     Tags = tags.ToArray(),
                     Stopped = !string.IsNullOrEmpty(stopped) && bool.Parse(stopped)
                 });
-
             }
 
             return result;

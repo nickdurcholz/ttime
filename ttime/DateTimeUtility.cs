@@ -25,6 +25,7 @@ namespace ttime
                         result = default;
                         return false;
                 }
+
                 return true;
             }
 
@@ -92,7 +93,7 @@ namespace ttime
                     var startMonth = q * 3 + 1;
                     var nextStartMonth = (q + 1) * 3 + 1;
                     return (
-                        new DateTime(today.Year, startMonth, 1), 
+                        new DateTime(today.Year, startMonth, 1),
                         new DateTime(today.Year + (nextStartMonth / 12), nextStartMonth % 12, 1)
                     );
                 }

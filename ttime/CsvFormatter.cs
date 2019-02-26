@@ -13,13 +13,13 @@ namespace ttime
         {
             CsvWriter.Write(
                 @out,
-                new[] {"Task", "Hours"},
-                report.Items.Select(i => new[] {i.Name, i.Hours.ToString("F")}));
+                new[] { "Task", "Hours" },
+                report.Items.Select(i => new[] { i.Name, i.Hours.ToString("F") }));
         }
 
         public override void Write(IEnumerable<TimeEntry> entries, TextWriter @out)
         {
-            var heads = new List<string> {"id", "time", "stopped"};
+            var heads = new List<string> { "id", "time", "stopped" };
             var data = entries.ToList();
             var numTags = data.Count == 0 ? 0 : data.Where(e => e.Tags != null).Max(e => e.Tags.Length);
 
@@ -44,7 +44,7 @@ namespace ttime
 
         public override List<TimeEntry> DeserializeEntries(TextReader reader)
         {
-            var csvOptions = new CsvOptions {HeaderMode = HeaderMode.HeaderPresent, TrimData = true};
+            var csvOptions = new CsvOptions { HeaderMode = HeaderMode.HeaderPresent, TrimData = true };
             int idIndex = -1;
             int timeIndex = -1;
             int stoppedIndex = -1;
