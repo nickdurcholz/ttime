@@ -58,14 +58,14 @@ namespace ttime
                 }
                 else if (arg.StartsWith("to="))
                 {
-                    if (arg.Length == 5)
+                    if (arg.Length == 3)
                     {
                         Error.WriteLine("Invalid to date: " + arg);
                         valid = false;
                         continue;
                     }
 
-                    if (!DateTime.TryParse(arg.Substring(5), out toDate))
+                    if (!DateTime.TryParse(arg.Substring(3), out toDate))
                     {
                         Error.WriteLine("Invalid to date: " + arg);
                         valid = false;
