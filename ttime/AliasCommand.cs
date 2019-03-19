@@ -58,6 +58,11 @@ namespace ttime
             }
             else
             {
+                if (name.EqualsIOC(Name))
+                {
+                    Error.WriteLine($"Not allowed to redefine the {Name} built-in command. Here be dragons...");
+                    return;
+                }
                 Configuration.SetAlias(name, arguments);
             }
         }
