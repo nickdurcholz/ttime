@@ -23,14 +23,28 @@ namespace ttime
             for (var i = 0; i < args.Length; i++)
             {
                 var arg = args[i];
-                if (!periodFound)
+                if (Enum.TryParse(arg, true, out period))
                 {
-                    periodFound = Enum.TryParse(arg, true, out period);
-                    if (periodFound) continue;
+                    if (periodFound)
+                    {
+                        Error.WriteLine("Multiple date ranges were specified. Please specify a single date or date range.");
+                        valid = false;
+                        continue;
+                    }
+
+                    periodFound = true;
+                    continue;
                 }
 
                 if (arg.StartsWith("from="))
                 {
+                    if (periodFound)
+                    {
+                        Error.WriteLine("Multiple date ranges were specified. Please specify a single date or date range.");
+                        valid = false;
+                        continue;
+                    }
+
                     if (arg.Length == 5)
                     {
                         Error.WriteLine("Invalid from date: " + arg);
@@ -50,6 +64,13 @@ namespace ttime
                 }
                 else if (arg.StartsWith("to="))
                 {
+                    if (periodFound)
+                    {
+                        Error.WriteLine("Multiple date ranges were specified. Please specify a single date or date range.");
+                        valid = false;
+                        continue;
+                    }
+
                     if (arg.Length == 5)
                     {
                         Error.WriteLine("Invalid to date: " + arg);
@@ -64,6 +85,20 @@ namespace ttime
                         continue;
                     }
 
+                    periodFound = true;
+                    period = ReportingPeriod.Custom;
+                }
+                else if (DateTime.TryParse(arg, out var date))
+                {
+                    if (periodFound)
+                    {
+                        Error.WriteLine("Multiple date ranges were specified. Please specify a single date or date range.");
+                        valid = false;
+                        continue;
+                    }
+
+                    fromDate = date;
+                    toDate = fromDate.AddDays(1);
                     periodFound = true;
                     period = ReportingPeriod.Custom;
                 }
