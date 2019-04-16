@@ -203,7 +203,7 @@ namespace ttime
             Out.WriteLine("usage: ttime report [day-of-week | last-week | yesterday | today |");
             Out.WriteLine("                    <date> | week | all | from=<date-time>");
             Out.WriteLine("                    [to=<date-time>]] [format=text|csv|xml|json]");
-            Out.WriteLine("                    [type=full|first-tag] [out=<file>] [tag]...");
+            Out.WriteLine("                    [type=full|firstTag] [out=<file>] [tag]...");
             Out.WriteLine();
             Out.WriteLine("    Print a report of how time was spent for a given period. When");
             Out.WriteLine("    invoked without specifying a period, the default period specified");
