@@ -14,6 +14,7 @@ namespace ttime
             DateTime fromDate = default;
             DateTime toDate = default;
             ReportType reportType = default;
+            var daily = false;
 
             var periodFound = false;
             var formatFound = false;
@@ -125,6 +126,29 @@ namespace ttime
 
                     typeFound = true;
                 }
+                else if (arg.StartsWith("daily="))
+                {
+                    if (outFile != null)
+                    {
+                        Error.WriteLine("Duplicate output specification found: " + arg);
+                        valid = false;
+                        continue;
+                    }
+
+                    if (arg.Length == 6)
+                    {
+                        Error.WriteLine("Invalid output specification: " + arg);
+                        valid = false;
+                        continue;
+                    }
+
+                    var val = arg.Substring(6);
+                    daily = string.Equals("y", val, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals("yes", val, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals("t", val, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals("true", val, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals("1", val, StringComparison.OrdinalIgnoreCase);
+                }
                 else if (arg.StartsWith("out="))
                 {
                     if (outFile != null)
@@ -169,7 +193,8 @@ namespace ttime
                 tags,
                 Configuration.StartOfWeek,
                 Configuration.RoundingPrecision,
-                reportType);
+                reportType,
+                daily);
             var formatter = Formatter.Create(format);
 
             var reports = calculator.CreateReport();
@@ -203,7 +228,7 @@ namespace ttime
             Out.WriteLine("usage: ttime report [<day-of-week> | lastWeek | yesterday | today |");
             Out.WriteLine("                    <date> | week | all | from=<date-time>");
             Out.WriteLine("                    [to=<date-time>]] [format=text|csv|xml|json]");
-            Out.WriteLine("                    [type=full|firstTag|daily] [out=<file>] [tag]...");
+            Out.WriteLine("                    [type=full|firstTag] [daily=y|n] [out=<file>] [tag]...");
             Out.WriteLine();
             Out.WriteLine("    Print a report of how time was spent for a given period. When");
             Out.WriteLine("    invoked without specifying a period, the default period specified");

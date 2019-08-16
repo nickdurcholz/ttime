@@ -15,6 +15,7 @@ namespace ttime
         private readonly DayOfWeek _startOfWeek;
         private readonly decimal _rounding;
         private readonly ReportType _reportType;
+        private readonly bool _daily;
 
         public ReportCalculator(
             Storage storage,
@@ -24,7 +25,8 @@ namespace ttime
             List<string> tags,
             DayOfWeek startOfWeek,
             decimal rounding,
-            ReportType reportType)
+            ReportType reportType,
+            bool daily = false)
         {
             _storage = storage;
             _period = period;
@@ -34,12 +36,13 @@ namespace ttime
             _startOfWeek = startOfWeek;
             _rounding = rounding;
             _reportType = reportType;
+            _daily = daily;
         }
 
         public IEnumerable<Report> CreateReport()
         {
             var (start, end) = DateTimeUtility.ExpandPeriod(_period, _startOfWeek, _fromDate, _toDate);
-            if (_reportType == ReportType.Daily)
+            if (_daily)
             {
                 var currentStart = start;
                 var currentEnd = start.Date.AddDays(1);
