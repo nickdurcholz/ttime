@@ -9,12 +9,18 @@ namespace ttime
 {
     public class CsvFormatter : Formatter
     {
-        public override void Write(Report report, TextWriter @out)
+        public override void Write(IEnumerable<Report> reports, TextWriter @out)
         {
             CsvWriter.Write(
                 @out,
-                new[] { "Task", "Hours" },
-                report.Items.Select(i => new[] { i.Name, i.Hours.ToString("F") }));
+                new[] { "Report Start", "Report End", "Task", "Hours" },
+                reports.SelectMany(r => r.Items.Select(i => new[]
+                {
+                    r.Start.ToString("O"),
+                    r.End.ToString("O"),
+                    i.Name,
+                    i.Hours.ToString("F")
+                })));
         }
 
         public override void Write(IEnumerable<TimeEntry> entries, TextWriter @out)

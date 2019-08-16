@@ -36,9 +36,33 @@ namespace ttime
             _reportType = reportType;
         }
 
-        public Report CreateReport()
+        public IEnumerable<Report> CreateReport()
         {
             var (start, end) = DateTimeUtility.ExpandPeriod(_period, _startOfWeek, _fromDate, _toDate);
+            if (_reportType == ReportType.Daily)
+            {
+                var currentStart = start;
+                var currentEnd = start.Date.AddDays(1);
+                if (currentEnd > end)
+                    currentEnd = end;
+
+                while (currentStart < end)
+                {
+                    yield return CreateSingleReport(currentStart, currentEnd);
+                    currentStart = currentEnd;
+                    currentEnd = currentEnd.AddDays(1);
+                    if (currentEnd > end)
+                        currentEnd = end;
+                }
+            }
+            else
+            {
+                yield return CreateSingleReport(start, end);
+            }
+        }
+
+        private Report CreateSingleReport(DateTime start, DateTime end)
+        {
             var entries = _storage.ListTimeEntries(start, end);
 
             var times = new Dictionary<string, long>();

@@ -7,7 +7,13 @@ namespace ttime
 {
     public class TextFormatter : Formatter
     {
-        public override void Write(Report report, TextWriter @out)
+        public override void Write(IEnumerable<Report> reports, TextWriter @out)
+        {
+            foreach(var report in reports)
+                Write(report, @out);
+        }
+
+        private void Write(Report report, TextWriter @out)
         {
             if (report.Items.Count == 0)
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using LiteDB;
@@ -9,7 +10,21 @@ namespace ttime
 {
     public class XmlFormatter : Formatter
     {
-        public override void Write(Report report, TextWriter @out)
+        public override void Write(IEnumerable<Report> reports, TextWriter @out)
+        {
+            var elements = reports.Select(CreateReportElement).ToArray();
+            var reportElement = elements.Length == 1 ? elements[0] : new XElement("reports", elements);
+
+            var settings = new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true };
+            using (var writer = XmlWriter.Create(@out, settings))
+            {
+                reportElement.WriteTo(writer);
+                writer.Flush();
+                writer.Close();
+            }
+        }
+
+        private static XElement CreateReportElement(Report report)
         {
             var reportElement = new XElement(
                 "report",
@@ -24,13 +39,7 @@ namespace ttime
                     new XAttribute("hours", item.Hours)));
             }
 
-            using (var writer =
-                XmlWriter.Create(@out, new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true }))
-            {
-                reportElement.WriteTo(writer);
-                writer.Flush();
-                writer.Close();
-            }
+            return reportElement;
         }
 
         public override void Write(IEnumerable<TimeEntry> entries, TextWriter @out)

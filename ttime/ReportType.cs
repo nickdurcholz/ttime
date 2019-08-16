@@ -3,6 +3,7 @@
     public enum ReportType
     {
         FirstTag,
-        Full
+        Full,
+        Daily
     }
 }

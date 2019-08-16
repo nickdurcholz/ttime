@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ttime
 {
@@ -34,11 +35,11 @@ namespace ttime
                 new List<string>(),
                 Configuration.StartOfWeek,
                 Configuration.RoundingPrecision,
-                default);
+                ReportType.FirstTag);
 
             var report = calculator.CreateReport();
 
-            hours -= report.Total;
+            hours -= report.Single().Total;
 
             Out.WriteLine(DateTime.Now.AddMilliseconds((double) hours * 3600000));
         }

@@ -172,7 +172,7 @@ namespace ttime
                 reportType);
             var formatter = Formatter.Create(format);
 
-            var report = calculator.CreateReport();
+            var reports = calculator.CreateReport();
 
             TextWriter reportOut = Out;
             if (outFile != null)
@@ -185,7 +185,7 @@ namespace ttime
 
             try
             {
-                formatter.Write(report, reportOut);
+                formatter.Write(reports, reportOut);
             }
             finally
             {
@@ -200,10 +200,10 @@ namespace ttime
 
         public override void PrintUsage()
         {
-            Out.WriteLine("usage: ttime report [day-of-week | last-week | yesterday | today |");
+            Out.WriteLine("usage: ttime report [<day-of-week> | lastWeek | yesterday | today |");
             Out.WriteLine("                    <date> | week | all | from=<date-time>");
             Out.WriteLine("                    [to=<date-time>]] [format=text|csv|xml|json]");
-            Out.WriteLine("                    [type=full|firstTag] [out=<file>] [tag]...");
+            Out.WriteLine("                    [type=full|firstTag|daily] [out=<file>] [tag]...");
             Out.WriteLine();
             Out.WriteLine("    Print a report of how time was spent for a given period. When");
             Out.WriteLine("    invoked without specifying a period, the default period specified");
