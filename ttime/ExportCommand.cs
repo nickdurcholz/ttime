@@ -38,7 +38,7 @@ namespace ttime
 
                 if (arg.StartsWith("from="))
                 {
-                    if (periodFound)
+                    if (periodFound && toDate != default)
                     {
                         Error.WriteLine("Multiple date ranges were specified. Please specify a single date or date range.");
                         valid = false;
@@ -64,7 +64,7 @@ namespace ttime
                 }
                 else if (arg.StartsWith("to="))
                 {
-                    if (periodFound)
+                    if (periodFound && toDate != default)
                     {
                         Error.WriteLine("Multiple date ranges were specified. Please specify a single date or date range.");
                         valid = false;
@@ -78,7 +78,7 @@ namespace ttime
                         continue;
                     }
 
-                    if (!DateTime.TryParse(arg.Substring(5), out toDate))
+                    if (!DateTime.TryParse(arg.Substring(3), out toDate))
                     {
                         Error.WriteLine("Invalid to date: " + arg);
                         valid = false;
