@@ -16,6 +16,7 @@ namespace ttime
         private readonly decimal _rounding;
         private readonly ReportType _reportType;
         private readonly bool _daily;
+        private readonly int? _firstTagCount;
 
         public ReportCalculator(
             Storage storage,
@@ -26,7 +27,8 @@ namespace ttime
             DayOfWeek startOfWeek,
             decimal rounding,
             ReportType reportType,
-            bool daily = false)
+            bool daily = false,
+            int? firstTagCount = null)
         {
             _storage = storage;
             _period = period;
@@ -37,6 +39,7 @@ namespace ttime
             _rounding = rounding;
             _reportType = reportType;
             _daily = daily;
+            _firstTagCount = firstTagCount;
         }
 
         public IEnumerable<Report> CreateReport()
@@ -92,7 +95,12 @@ namespace ttime
                     if (_tags.Count == 0)
                     {
                         if (_reportType == ReportType.FirstTag)
-                            previousTags.Add(entry.Tags.Length == 0 ? "Unspecified" : entry.Tags[0]);
+                        {
+                            int n = 1;
+                            if (_firstTagCount.HasValue && _firstTagCount > 0)
+                                n = _firstTagCount.Value;
+                            previousTags.Add(entry.Tags.Length == 0 ? "Unspecified" : string.Join(", ", entry.Tags.Take(n)));
+                        }
                         else
                         {
                             if (entry.Tags.Length == 0)

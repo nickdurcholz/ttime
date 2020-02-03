@@ -15,6 +15,7 @@ namespace ttime
             DateTime toDate = default;
             ReportType reportType = default;
             var daily = false;
+            int? firstTagCount = null;
 
             var periodFound = false;
             var formatFound = false;
@@ -167,6 +168,26 @@ namespace ttime
 
                     outFile = arg.Substring(4);
                 }
+                else if (arg.StartsWith("n="))
+                {
+                    if (firstTagCount != null)
+                    {
+                        Error.WriteLine("Duplicate combine count arg: " + arg);
+                        valid = false;
+                        continue;
+                    }
+
+                    if (int.TryParse(arg.AsSpan(2), out var n))
+                    {
+                        firstTagCount = n;
+                    }
+                    else
+                    {
+                        Error.WriteLine("Invalid combine count : " + arg);
+                        valid = false;
+                        continue;
+                    }
+                }
                 else
                 {
                     tags.Add(arg);
@@ -194,7 +215,8 @@ namespace ttime
                 Configuration.StartOfWeek,
                 Configuration.RoundingPrecision,
                 reportType,
-                daily);
+                daily,
+                firstTagCount);
             var formatter = Formatter.Create(format);
 
             var reports = calculator.CreateReport();
@@ -228,7 +250,8 @@ namespace ttime
             Out.WriteLine("usage: ttime report [<day-of-week> | lastWeek | yesterday | today |");
             Out.WriteLine("                    <date> | week | all | from=<date-time>");
             Out.WriteLine("                    [to=<date-time>]] [format=text|csv|xml|json]");
-            Out.WriteLine("                    [type=full|firstTag] [daily=y|n] [out=<file>] [tag]...");
+            Out.WriteLine("                    [type=full|firstTag] [combine=n] [daily=y|n] ");
+            Out.WriteLine("                    [out=<file>] [tag]...");
             Out.WriteLine();
             Out.WriteLine("    Print a report of how time was spent for a given period. When");
             Out.WriteLine("    invoked without specifying a period, the default period specified");
