@@ -9,6 +9,7 @@ namespace ttime
         public override void Run(Span<string> args)
         {
             decimal hours = 0;
+            var considerWeeklyHours = true;
             if (args.Length == 1)
             {
                 if (!decimal.TryParse(args[0], out hours))
@@ -16,6 +17,8 @@ namespace ttime
                     Error.WriteLine("Invalid number of hours: " + args[0]);
                     return;
                 }
+
+                considerWeeklyHours = false;
             }
             else if (args.Length > 1)
             {
@@ -24,12 +27,21 @@ namespace ttime
                 return;
             }
 
+            hours = GetStopTime(hours, ReportingPeriod.Today);
+            if (considerWeeklyHours)
+                hours = Math.Min(hours, GetStopTime(Configuration.HoursPerWeek, ReportingPeriod.Week));
+
+            Out.WriteLine(DateTime.Now.AddMilliseconds((double) hours * 3600000));
+        }
+
+        private decimal GetStopTime(decimal hours, ReportingPeriod reportingPeriod)
+        {
             if (hours <= 0)
                 hours = 8m;
 
             var calculator = new ReportCalculator(
                 Storage,
-                ReportingPeriod.Today,
+                reportingPeriod,
                 default,
                 default,
                 new List<string>(),
@@ -40,16 +52,15 @@ namespace ttime
             var report = calculator.CreateReport();
 
             hours -= report.Single().Total;
-
-            Out.WriteLine(DateTime.Now.AddMilliseconds((double) hours * 3600000));
+            return hours;
         }
 
         public override void PrintUsage()
         {
             Out.WriteLine("usage: ttime stop-time [<hours>]");
             Out.WriteLine();
-            Out.WriteLine("    Show what time you can stop working today and have worked the");
-            Out.WriteLine("    given amount of time.");
+            Out.WriteLine("    Show what time you can stop working today and have worked a full");
+            Out.WriteLine("    day or week, whichever is earlier.");
             Out.WriteLine();
             Out.WriteLine("    Optionally specify a number of hours (e.g. '8.5') that you want");
             Out.WriteLine("    to work. Defaults to 8 hours if omitted.");

@@ -12,6 +12,7 @@ namespace ttime
         private const string DefaultExportFormatKey = "defaultExportFormat";
         private const string StartOfWeekKey = "startOfWeek";
         private const string RoundingKey = "rounding";
+        private const string HoursPerWeekKey = "hoursPerWeek";
 
         private readonly Storage _storage;
         private readonly List<ConfigSetting> _settings;
@@ -21,6 +22,7 @@ namespace ttime
         private DayOfWeek _startOfWeek;
         private decimal _roundingPrecision;
         private ReportType _defaultReportType;
+        private int _hoursPerWeek;
 
         public Configuration(Storage storage)
         {
@@ -54,10 +56,23 @@ namespace ttime
             value = GetSetting(RoundingKey, "0");
             _roundingPrecision = decimal.Parse(value);
 
+            if (!int.TryParse(GetSetting(HoursPerWeekKey), out _hoursPerWeek))
+                _hoursPerWeek = 40;
+
             Aliases = storage.ListAliases().ToList();
         }
 
         public List<Alias> Aliases { get; set; }
+
+        public int HoursPerWeek
+        {
+            get => _hoursPerWeek;
+            set
+            {
+                _hoursPerWeek = value;
+                this[HoursPerWeekKey] = value.ToString();
+            }
+        }
 
         public ReportingPeriod DefaultReportingPeriod
         {

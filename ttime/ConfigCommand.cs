@@ -74,6 +74,8 @@ namespace ttime
             Out.WriteLine("    defaultFormat       The default output format for reports.");
             Out.WriteLine("    startOfWeek         The start of the work week to use in calculations.");
             Out.WriteLine("                        Affects reporting for the lastWeek and week report periods.");
+            Out.WriteLine();
+            Out.WriteLine("    hoursPerWeek        The target number of hours you normally work in a week.");
         }
 
         public override string Name => "config";
