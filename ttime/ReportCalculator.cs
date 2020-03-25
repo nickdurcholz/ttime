@@ -99,7 +99,7 @@ namespace ttime
                             int n = 1;
                             if (_firstTagCount.HasValue && _firstTagCount > 0)
                                 n = _firstTagCount.Value;
-                            previousTags.Add(entry.Tags.Length == 0 ? "Unspecified" : string.Join(", ", entry.Tags.Take(n)));
+                            previousTags.Add(entry.Tags.Length == 0 ? "Unspecified" : string.Join(" ", entry.Tags.Take(n)));
                         }
                         else
                         {
