@@ -5,7 +5,7 @@ namespace ttime
 {
     public static class Extensions
     {
-        public static bool EqualsIOC(this string a, string b)
+        public static bool EqualsOIC(this string a, string b)
         {
             return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
         }

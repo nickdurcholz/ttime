@@ -138,7 +138,7 @@ namespace ttime
         {
             get
             {
-                var setting = _settings.SingleOrDefault(s => s.Key.EqualsIOC(name));
+                var setting = _settings.SingleOrDefault(s => s.Key.EqualsOIC(name));
                 if (setting == null)
                 {
                     throw new ArgumentOutOfRangeException(
@@ -150,7 +150,7 @@ namespace ttime
             }
             set
             {
-                var setting = _settings.SingleOrDefault(s => s.Key.EqualsIOC(name));
+                var setting = _settings.SingleOrDefault(s => s.Key.EqualsOIC(name));
                 if (setting == null)
                 {
                     throw new ArgumentOutOfRangeException(
@@ -165,7 +165,7 @@ namespace ttime
 
         public bool HasSetting(string setting)
         {
-            return _settings.Any(s => s.Key.EqualsIOC(setting));
+            return _settings.Any(s => s.Key.EqualsOIC(setting));
         }
 
         public IEnumerable<KeyValuePair<string, string>> Settings
@@ -175,7 +175,7 @@ namespace ttime
 
         public void SetAlias(string name, List<string> arguments)
         {
-            var alias = Aliases.FirstOrDefault(a => a.Name.EqualsIOC(name));
+            var alias = Aliases.FirstOrDefault(a => a.Name.EqualsOIC(name));
             if (alias == null)
             {
                 alias = new Alias();
@@ -189,7 +189,7 @@ namespace ttime
 
         public void DeleteAlias(string name)
         {
-            var alias = Aliases.FirstOrDefault(a => a.Name.EqualsIOC(name));
+            var alias = Aliases.FirstOrDefault(a => a.Name.EqualsOIC(name));
             if (alias != null)
             {
                 Aliases.Remove(alias);

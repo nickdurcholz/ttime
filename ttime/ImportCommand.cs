@@ -63,11 +63,11 @@ namespace ttime
             if (!formatFound)
             {
                 var extension = Path.GetExtension(file);
-                if (".csv".EqualsIOC(extension))
+                if (".csv".EqualsOIC(extension))
                     format = Format.Csv;
-                else if (".xml".EqualsIOC(extension))
+                else if (".xml".EqualsOIC(extension))
                     format = Format.Xml;
-                else if (".json".EqualsIOC(extension))
+                else if (".json".EqualsOIC(extension))
                     format = Format.Json;
                 else
                     format = Configuration.DefaultExportFormat;

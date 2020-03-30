@@ -50,33 +50,38 @@ namespace ttime
 
         public override List<TimeEntry> DeserializeEntries(TextReader reader)
         {
-            var csvOptions = new CsvOptions { HeaderMode = HeaderMode.HeaderPresent, TrimData = true };
-            int idIndex = -1;
-            int timeIndex = -1;
-            int stoppedIndex = -1;
-            bool first = true;
+            var csvOptions = new CsvOptions { HeaderMode = HeaderMode.HeaderAbsent, TrimData = true };
+            const int idIndex = 0;
+            const int timeIndex = 1;
+            const int stoppedIndex = 2;
+            int lineNumber = 0;
             List<TimeEntry> result = new List<TimeEntry>();
             while (reader.Peek() == '#')
                 reader.ReadLine();
             foreach (var line in CsvReader.Read(reader, csvOptions))
             {
-                if (first)
+                lineNumber++;
+
+                if (lineNumber == 1 && line[idIndex].EqualsOIC("id") && line[timeIndex].EqualsOIC("time"))
+                    continue; // skip header line if present
+
+                var id = line[idIndex];
+                var timeString = line[timeIndex];
+                DateTime time;
+                try
                 {
-                    var headers = new List<string>(line.Headers);
-                    idIndex = headers.IndexOf("id");
-                    timeIndex = headers.IndexOf("time");
-                    stoppedIndex = headers.IndexOf("stopped");
-                    first = false;
+                    time = string.IsNullOrEmpty(timeString) ? default : DateTime.Parse(timeString);
+                }
+                catch (FormatException)
+                {
+                    throw new FormatException($"Error on line {lineNumber}. '{timeString}' is not a valid date/time.");
                 }
 
-                var id = idIndex >= 0 ? line[idIndex] : null;
-                var timeString = line[timeIndex];
-                var time = string.IsNullOrEmpty(timeString) ? default : DateTime.Parse(timeString);
-                var stopped = stoppedIndex >= 0 ? line[stoppedIndex] : null;
+                var stopped = line[stoppedIndex];
                 var tags = new List<string>();
-                for (int i = 0; i < line.ColumnCount; i++)
+                for (int i = 3; i < line.ColumnCount; i++)
                 {
-                    if (i != idIndex && i != timeIndex && i != stoppedIndex && !string.IsNullOrEmpty(line[i]))
+                    if (!string.IsNullOrEmpty(line[i]))
                         tags.Add(line[i]);
                 }
 

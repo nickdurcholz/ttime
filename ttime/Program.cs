@@ -49,7 +49,7 @@ namespace ttime
 
                 var requestedCommandName = args.Length > 0 ? args[0] : "help";
 
-                var alias = configuration.Aliases.FirstOrDefault(a => a.Name.EqualsIOC(requestedCommandName));
+                var alias = configuration.Aliases.FirstOrDefault(a => a.Name.EqualsOIC(requestedCommandName));
                 if (alias != null)
                     requestedCommandName = alias.Args[0];
 
@@ -80,7 +80,7 @@ namespace ttime
 
         public static Command GetCommand(string action)
         {
-            return AvailableCommands.FirstOrDefault(c => action.EqualsIOC(c.Name));
+            return AvailableCommands.FirstOrDefault(c => action.EqualsOIC(c.Name));
         }
 
         private static string GetDbPath()

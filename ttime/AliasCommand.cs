@@ -41,7 +41,7 @@ namespace ttime
             }
             else if (arguments.Count == 0)
             {
-                var alias = Configuration.Aliases.FirstOrDefault(a => a.Name.EqualsIOC(name));
+                var alias = Configuration.Aliases.FirstOrDefault(a => a.Name.EqualsOIC(name));
                 if (alias != null)
                 {
                     for (var i = 0; i < alias.Args.Count; i++)
@@ -51,14 +51,14 @@ namespace ttime
                     }
                 }
             }
-            else if (name.EqualsIOC("remove"))
+            else if (name.EqualsOIC("remove"))
             {
                 if (arguments.Count == 1)
                     Configuration.DeleteAlias(arguments[0]);
             }
             else
             {
-                if (name.EqualsIOC(Name))
+                if (name.EqualsOIC(Name))
                 {
                     Error.WriteLine($"Not allowed to redefine the {Name} built-in command. Here be dragons...");
                     return;
