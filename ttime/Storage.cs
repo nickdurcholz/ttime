@@ -1,54 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using LiteDB;
 
 namespace ttime
 {
     public class Storage
     {
+        private const int CurrentDataVersion = 1;
+
         private readonly LiteDatabase _db;
-        private LiteCollection<ConfigSetting> _configCollection;
-        private LiteCollection<TimeEntry> _timeCollection;
-        private LiteCollection<Alias> _aliasCollection;
+        private ILiteCollection<ConfigSetting> _configCollection;
+        private ILiteCollection<TimeEntry> _timeCollection;
+        private ILiteCollection<Alias> _aliasCollection;
 
         public Storage(LiteDatabase db)
         {
             _db = db;
         }
 
-        private LiteCollection<ConfigSetting> ConfigCollection
+        private ILiteCollection<ConfigSetting> ConfigCollection
         {
             get
             {
                 if (_configCollection == null)
                 {
                     _configCollection = _db.GetCollection<ConfigSetting>("config");
-
-                    if (_configCollection.GetIndexes().Any(i => i.Field == "Name"))
-                        _configCollection.DropIndex("Name");
                 }
 
                 return _configCollection;
             }
         }
 
-        private LiteCollection<TimeEntry> TimeCollection
+        private ILiteCollection<TimeEntry> TimeCollection
         {
             get
             {
                 if (_timeCollection == null)
                 {
                     _timeCollection = _db.GetCollection<TimeEntry>("time");
-                    _timeCollection.EnsureIndex(e => e.Time, true);
+                    _timeCollection.EnsureIndex(e => e.Time);
                 }
 
                 return _timeCollection;
             }
         }
 
-        private LiteCollection<Alias> AliasCollection =>
-            _aliasCollection ?? (_aliasCollection = _db.GetCollection<Alias>("alias"));
+        private ILiteCollection<Alias> AliasCollection => _aliasCollection ??= _db.GetCollection<Alias>("alias");
 
         public IEnumerable<ConfigSetting> ListConfigSettings()
         {
@@ -68,7 +65,11 @@ namespace ttime
         public IEnumerable<TimeEntry> ListTimeEntries(DateTime start, DateTime end)
         {
             //start inclusive, end exclusive. This avoids an edge case when reporting when a task starts at exactly midnight.
-            return TimeCollection.Find(e => start <= e.Time && e.Time < end);
+            var results = TimeCollection.Query()
+                .Where(e => start <= e.Time && e.Time < end)
+                .OrderBy(e => e.Time)
+                .ToEnumerable();
+            return results;
         }
 
         public TimeEntry GetNextEntry(TimeEntry entry)
@@ -100,6 +101,14 @@ namespace ttime
         public void Delete(Alias @alias)
         {
             AliasCollection.Delete(@alias.Id);
+        }
+
+        public void Import(LiteDatabase originalDb)
+        {
+            ConfigCollection.InsertBulk(originalDb.GetCollection<ConfigSetting>("config").FindAll());
+            AliasCollection.InsertBulk(originalDb.GetCollection<Alias>("alias").FindAll());
+            TimeCollection.InsertBulk(originalDb.GetCollection<TimeEntry>("time").FindAll());
+            _db.GetCollection<DataFormatVersion>("data_version").Insert(new DataFormatVersion {Version = CurrentDataVersion});
         }
     }
 }

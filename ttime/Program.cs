@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using LiteDB;
-using FileMode = LiteDB.FileMode;
 
 namespace ttime
 {
@@ -23,16 +22,25 @@ namespace ttime
             new AliasCommand(),
             new RemoveCommand(),
             new StopTimeCommand(),
+            new UpgradeDbCommand(),
         };
 
         static void Main(string[] args)
         {
+            var requestedCommandName = args.Length > 0 ? args[0] : "help";
+            var command = GetCommand(requestedCommandName);
+            if (command is UpgradeDbCommand upgradeCommand)
+            {
+                upgradeCommand.DbPath = GetDbPath();
+                command.Run(new Span<string>());
+                return;
+            }
+
             var dbPath = GetDbPath();
             _db = new LiteDatabase(new ConnectionString
             {
                 Filename = dbPath,
-                Mode = FileMode.Exclusive,
-                Upgrade = true,
+                Upgrade = false,
             });
             using (_db)
             {
@@ -47,13 +55,11 @@ namespace ttime
                     c.In = Console.In;
                 }
 
-                var requestedCommandName = args.Length > 0 ? args[0] : "help";
-
                 var alias = configuration.Aliases.FirstOrDefault(a => a.Name.EqualsOIC(requestedCommandName));
                 if (alias != null)
                     requestedCommandName = alias.Args[0];
 
-                var command = GetCommand(requestedCommandName);
+                command ??= GetCommand(requestedCommandName);
                 if (command == null)
                 {
                     Console.Error.WriteLine("Command not found: " + requestedCommandName);
