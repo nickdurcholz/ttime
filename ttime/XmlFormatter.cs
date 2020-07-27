@@ -13,12 +13,12 @@ namespace ttime
         public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel, List<string> tags)
         {
             var elements = reports.Select(CreateReportElement).ToArray();
-            var reportElement = elements.Length == 1 ? elements[0] : new XElement("reports", elements);
+            var root = elements.Length == 1 ? elements[0] : new XElement("reports", elements);
 
-            var settings = new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true };
+            var settings = new XmlWriterSettings {Indent = true, OmitXmlDeclaration = true};
             using (var writer = XmlWriter.Create(@out, settings))
             {
-                reportElement.WriteTo(writer);
+                root.WriteTo(writer);
                 writer.Flush();
                 writer.Close();
             }
@@ -28,8 +28,8 @@ namespace ttime
         {
             var reportElement = new XElement(
                 "report",
-                new XAttribute("start", report.Start.ToString("u")),
-                new XAttribute("end", report.End.ToString("u")),
+                new XAttribute("start", report.Start.ToString("s")),
+                new XAttribute("end", report.End.ToString("s")),
                 new XAttribute("hours", report.Hours));
             AddSubTasks(report.Items, reportElement);
 
@@ -57,7 +57,7 @@ namespace ttime
                 var entryElement = new XElement(
                     "entry",
                     new XAttribute("id", entry.Id),
-                    new XAttribute("time", entry.Time.ToString("O")),
+                    new XAttribute("time", entry.Time.ToString("s")),
                     new XAttribute("stopped", entry.Stopped ? "true" : "false"));
                 foreach (var tag in entry.Tags)
                     entryElement.Add(new XElement("tag", tag));

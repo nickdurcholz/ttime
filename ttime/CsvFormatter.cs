@@ -11,16 +11,57 @@ namespace ttime
     {
         public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel, List<string> tags)
         {
-            CsvWriter.Write(
-                @out,
-                new[] { "Report Start", "Report End", "Task", "Hours" },
-                reports.SelectMany(r => r.Items.Select(i => new[]
+            var rows = reports.SelectMany(r => GetRows(r, tags)).ToList();
+            var maxcols = rows.Max(r => r.Length);
+            var headers = new List<string> { "Report Start", "Report End", "Hours" };
+            for (int i = 0; i < maxcols-3; i++)
+            {
+                headers.Add($"Tag {i}");
+            }
+            CsvWriter.Write(@out, headers.ToArray(), rows);
+        }
+
+        private IEnumerable<string[]> GetRows(Report report, List<string> tags)
+        {
+            Stack<Report.Item> stack = new Stack<Report.Item>();
+            var itemsInScope = EnumerateItems(report.Items, tags);
+            return itemsInScope.Select(i =>
+            {
+                var list = new List<string>
                 {
-                    r.Start.ToString("O"),
-                    r.End.ToString("O"),
-                    i.GetName(),
+                    report.Start.ToString("O"),
+                    report.End.ToString("O"),
                     i.Hours.ToString("F")
-                })));
+                };
+                list.AddRange(EnumerateTags(i, stack));
+                return list.ToArray();
+            });
+        }
+
+        private IEnumerable<string> EnumerateTags(Report.Item item, Stack<Report.Item> stack)
+        {
+            while (item != null)
+            {
+                stack.Push(item);
+                item = item.Parent;
+            }
+
+            if (stack.Count == 0)
+                yield return "Unspecified";
+            while (stack.Count > 0)
+                yield return stack.Pop().Tag;
+        }
+
+        private IEnumerable<Report.Item> EnumerateItems(List<Report.Item> items, List<string> tags)
+        {
+            foreach (var item in items)
+            {
+                if (tags == null || tags.Count == 0 || tags.Any(t => t.EqualsOIC(item.Tag)))
+                    yield return item;
+
+                foreach (var c in EnumerateItems(item.Children, tags))
+                    yield return c;
+            }
         }
 
         public override void Write(IEnumerable<TimeEntry> entries, TextWriter @out)

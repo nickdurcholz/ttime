@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace ttime
 {
@@ -67,6 +68,7 @@ namespace ttime
         {
             public string Tag { get; set; }
             public List<Item> Children { get; } = new List<Item>();
+            [JsonIgnore]
             public Item Parent { get; set; }
             public long Milliseconds { get; set; }
             public decimal Hours { get; set; }
