@@ -23,7 +23,7 @@ namespace ttime
             }
         }
 
-        public abstract void Write(IEnumerable<Report> reports, TextWriter @out);
+        public abstract void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel, List<string> tags);
 
         public abstract void Write(IEnumerable<TimeEntry> entries, TextWriter @out);
 

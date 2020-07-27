@@ -9,7 +9,7 @@ namespace ttime
 {
     public class CsvFormatter : Formatter
     {
-        public override void Write(IEnumerable<Report> reports, TextWriter @out)
+        public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel, List<string> tags)
         {
             CsvWriter.Write(
                 @out,
@@ -18,7 +18,7 @@ namespace ttime
                 {
                     r.Start.ToString("O"),
                     r.End.ToString("O"),
-                    i.Name,
+                    i.GetName(),
                     i.Hours.ToString("F")
                 })));
         }

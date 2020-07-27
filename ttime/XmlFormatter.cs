@@ -10,7 +10,7 @@ namespace ttime
 {
     public class XmlFormatter : Formatter
     {
-        public override void Write(IEnumerable<Report> reports, TextWriter @out)
+        public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel, List<string> tags)
         {
             var elements = reports.Select(CreateReportElement).ToArray();
             var reportElement = elements.Length == 1 ? elements[0] : new XElement("reports", elements);
@@ -30,16 +30,23 @@ namespace ttime
                 "report",
                 new XAttribute("start", report.Start.ToString("u")),
                 new XAttribute("end", report.End.ToString("u")),
-                new XAttribute("total", report.Total));
-            foreach (var item in report.Items)
-            {
-                reportElement.Add(new XElement(
-                    "task",
-                    new XAttribute("name", item.Name),
-                    new XAttribute("hours", item.Hours)));
-            }
+                new XAttribute("hours", report.Hours));
+            AddSubTasks(report.Items, reportElement);
 
             return reportElement;
+        }
+
+        private static void AddSubTasks(List<Report.Item> items, XElement container)
+        {
+            foreach (var item in items)
+            {
+                var task = new XElement(
+                    "task",
+                    new XAttribute("name", item.Tag),
+                    new XAttribute("hours", item.Hours));
+                container.Add(task);
+                AddSubTasks(item.Children, task);
+            }
         }
 
         public override void Write(IEnumerable<TimeEntry> entries, TextWriter @out)

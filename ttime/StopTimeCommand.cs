@@ -44,14 +44,12 @@ namespace ttime
                 reportingPeriod,
                 default,
                 default,
-                new List<string>(),
                 Configuration.StartOfWeek,
-                Configuration.RoundingPrecision,
-                ReportType.FirstTag);
+                Configuration.RoundingPrecision);
 
             var report = calculator.CreateReport();
 
-            hours -= report.Single().Total;
+            hours -= report.Single().Hours;
             return hours;
         }
 

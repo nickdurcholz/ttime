@@ -21,7 +21,6 @@ namespace ttime
         private Format _defaultExportFormat;
         private DayOfWeek _startOfWeek;
         private decimal _roundingPrecision;
-        private ReportType _defaultReportType;
         private int _hoursPerWeek;
 
         public Configuration(Storage storage)
@@ -43,9 +42,6 @@ namespace ttime
 
             value = GetSetting(DefaultReportFormatKey, nameof(Format.Text));
             _defaultReportFormat = Enum.Parse<Format>(value, true);
-
-            value = GetSetting(DefaultReportTypeKey, nameof(ReportType.FirstTag));
-            _defaultReportType = Enum.Parse<ReportType>(value, true);
 
             value = GetSetting(DefaultExportFormatKey, nameof(Format.Csv));
             _defaultExportFormat = Enum.Parse<Format>(value, true);
@@ -91,16 +87,6 @@ namespace ttime
             {
                 _defaultReportFormat = value;
                 this[DefaultReportFormatKey] = value.ToString();
-            }
-        }
-
-        public ReportType DefaultReportType
-        {
-            get => _defaultReportType;
-            set
-            {
-                _defaultReportType = value;
-                this[DefaultReportTypeKey] = value.ToString();
             }
         }
 

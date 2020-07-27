@@ -13,13 +13,11 @@ namespace ttime
             string outFile = null;
             DateTime fromDate = default;
             DateTime toDate = default;
-            ReportType reportType = default;
             var daily = false;
-            int? firstTagCount = null;
+            int? nestingLevel = null;
 
             var periodFound = false;
             var formatFound = false;
-            var typeFound = false;
             var tags = new List<string>();
             var valid = true;
             for (var i = 0; i < args.Length; i++)
@@ -102,31 +100,6 @@ namespace ttime
 
                     formatFound = true;
                 }
-                else if (arg.StartsWith("type="))
-                {
-                    if (typeFound)
-                    {
-                        Error.WriteLine("Duplicate type specification found: " + arg);
-                        valid = false;
-                        continue;
-                    }
-
-                    if (arg.Length == 5)
-                    {
-                        Error.WriteLine("Invalid type: " + arg);
-                        valid = false;
-                        continue;
-                    }
-
-                    if (!Enum.TryParse(arg.Substring(5), true, out reportType))
-                    {
-                        Error.WriteLine("Invalid type: " + arg);
-                        valid = false;
-                        continue;
-                    }
-
-                    typeFound = true;
-                }
                 else if (arg.StartsWith("daily="))
                 {
                     if (outFile != null)
@@ -170,7 +143,7 @@ namespace ttime
                 }
                 else if (arg.StartsWith("n="))
                 {
-                    if (firstTagCount != null)
+                    if (nestingLevel != null)
                     {
                         Error.WriteLine("Duplicate combine count arg: " + arg);
                         valid = false;
@@ -179,7 +152,7 @@ namespace ttime
 
                     if (int.TryParse(arg.AsSpan(2), out var n))
                     {
-                        firstTagCount = n;
+                        nestingLevel = n;
                     }
                     else
                     {
@@ -201,8 +174,6 @@ namespace ttime
                 period = Configuration.DefaultReportingPeriod;
             if (!formatFound)
                 format = Configuration.DefaultReportFormat;
-            if (!typeFound)
-                reportType = Configuration.DefaultReportType;
             if (toDate == default)
                 toDate = DateTime.Now;
 
@@ -211,12 +182,9 @@ namespace ttime
                 period,
                 fromDate,
                 toDate,
-                tags,
                 Configuration.StartOfWeek,
                 Configuration.RoundingPrecision,
-                reportType,
-                daily,
-                firstTagCount);
+                daily);
             var formatter = Formatter.Create(format);
 
             var reports = calculator.CreateReport();
@@ -232,7 +200,7 @@ namespace ttime
 
             try
             {
-                formatter.Write(reports, reportOut);
+                formatter.Write(reports, reportOut, nestingLevel, tags);
             }
             finally
             {
@@ -250,30 +218,17 @@ namespace ttime
             Out.WriteLine("usage: ttime report [<day-of-week> | lastWeek | yesterday | today |");
             Out.WriteLine("                    <date> | week | all | from=<date-time>");
             Out.WriteLine("                    [to=<date-time>]] [format=text|csv|xml|json]");
-            Out.WriteLine("                    [type=full|firstTag] [combine=n] [daily=y|n] ");
-            Out.WriteLine("                    [out=<file>] [tag]...");
+            Out.WriteLine("                    [n=3] [daily=y|n] [out=<file>] [tag]...");
             Out.WriteLine();
             Out.WriteLine("    Print a report of how time was spent for a given period. When");
             Out.WriteLine("    invoked without specifying a period, the default period specified");
             Out.WriteLine("    in Configuration settings is used.");
             Out.WriteLine();
-            Out.WriteLine("    A report type of full reports time on all tracked tags. If you started");
-            Out.WriteLine("    tracking time at 9am with the tags task1 and task2 and stopped tracking");
-            Out.WriteLine("    time at noon, then a full report would report that you worked for 3 hours");
-            Out.WriteLine("    on task1 and 3 hours on task2 and worked for a total of 3 hours. While time");
-            Out.WriteLine("    spent on individual tasks won't add up to the total if you were tracking");
-            Out.WriteLine("    time on more than one task at a time, this is desirable for some reporting");
-            Out.WriteLine("    scenarios.");
+            Out.WriteLine("    n is the 'nesting level', which controls heirarchical display of");
+            Out.WriteLine("    reports when formatted as plain text.");
             Out.WriteLine();
-            Out.WriteLine("    A report type of firstTag reports time on the first tracked tag for every");
-            Out.WriteLine("    entry. If you started tracking time at 9am with the tags task1 and task2");
-            Out.WriteLine("    and stopped tracking time at noon, a firstTag report would report that you");
-            Out.WriteLine("    worked 3 hours on task1 and worked for a total of 3 hours. The benefit here");
-            Out.WriteLine("    is that line items in the report will always add up to the total. You can");
-            Out.WriteLine("    still get a report of how much time you spent on task2 by explicitly");
-            Out.WriteLine("    requesting that tag.");
-            Out.WriteLine();
-            Out.WriteLine("    You can specify the default report type using 'ttime config'");
+            Out.WriteLine("    specify daily=y to display a separate report for each day");
+            Out.WriteLine("    contained in the requested period.");
         }
 
         public override string Name => "report";

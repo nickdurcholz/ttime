@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using LiteDB;
 
 namespace ttime
 {
@@ -11,35 +9,26 @@ namespace ttime
         private readonly ReportingPeriod _period;
         private readonly DateTime _fromDate;
         private readonly DateTime _toDate;
-        private readonly List<string> _tags;
         private readonly DayOfWeek _startOfWeek;
         private readonly decimal _rounding;
-        private readonly ReportType _reportType;
         private readonly bool _daily;
-        private readonly int? _firstTagCount;
 
         public ReportCalculator(
             Storage storage,
             ReportingPeriod period,
             DateTime fromDate,
             DateTime toDate,
-            List<string> tags,
             DayOfWeek startOfWeek,
             decimal rounding,
-            ReportType reportType,
-            bool daily = false,
-            int? firstTagCount = null)
+            bool daily = false)
         {
             _storage = storage;
             _period = period;
             _fromDate = fromDate;
             _toDate = toDate;
-            _tags = tags;
             _startOfWeek = startOfWeek;
             _rounding = rounding;
-            _reportType = reportType;
             _daily = daily;
-            _firstTagCount = firstTagCount;
         }
 
         public IEnumerable<Report> CreateReport()
@@ -71,47 +60,16 @@ namespace ttime
         {
             var entries = _storage.ListTimeEntries(start, end);
 
-            var times = new Dictionary<string, long>();
-            var previousTags = new List<string>();
             var previousEntry = default(TimeEntry);
-            long totalTime = 0;
+            var report = new Report(_rounding)
+            {
+                Start = start,
+                End = end
+            };
             foreach (var entry in entries)
             {
                 if (previousEntry != null && !previousEntry.Stopped)
-                {
-                    var currentMs = (long) (entry.Time - previousEntry.Time).TotalMilliseconds;
-                    totalTime += currentMs;
-                    foreach (var previousTag in previousTags)
-                    {
-                        times.TryGetValue(previousTag, out var total);
-                        total += currentMs;
-                        times[previousTag] = total;
-                    }
-                }
-
-                if (!entry.Stopped)
-                {
-                    previousTags.Clear();
-                    if (_tags.Count == 0)
-                    {
-                        if (_reportType == ReportType.FirstTag)
-                        {
-                            int n = 1;
-                            if (_firstTagCount.HasValue && _firstTagCount > 0)
-                                n = _firstTagCount.Value;
-                            previousTags.Add(entry.Tags.Length == 0 ? "Unspecified" : string.Join(" ", entry.Tags.Take(n)));
-                        }
-                        else
-                        {
-                            if (entry.Tags.Length == 0)
-                                previousTags.Add("Unspecified");
-                            else
-                                previousTags.AddRange(entry.Tags);
-                        }
-                    }
-                    else
-                        previousTags.AddRange(entry.Tags.Intersect(_tags));
-                }
+                    report.Add(previousEntry.Tags, (long) (entry.Time - previousEntry.Time).TotalMilliseconds);
 
                 previousEntry = entry;
             }
@@ -121,47 +79,18 @@ namespace ttime
                 var nextEntry = _storage.GetNextEntry(previousEntry);
                 var endTime = nextEntry?.Time ?? DateTime.Now;
                 var currentMs = (long) (endTime - previousEntry.Time).TotalMilliseconds;
-                totalTime += currentMs;
-                foreach (var previousTag in previousTags)
-                {
-                    times.TryGetValue(previousTag, out var total);
-                    total += currentMs;
-                    times[previousTag] = total;
-                }
+                report.Add(previousEntry.Tags, currentMs);
             }
 
-            var keys = new List<string>(_tags);
-            if (keys.Count == 0)
-            {
-                keys.AddRange(times.Keys);
-                keys.Sort(StringComparer.OrdinalIgnoreCase);
-            }
-
-            return new Report
-            {
-                Start = start,
-                End = end,
-                Items = keys.Select(k =>
-                {
-                    times.TryGetValue(k, out var ms);
-                    return new Report.Item
-                    {
-                        Name = k,
-                        Hours = RoundMillisecondsToHours(ms),
-                    };
-                }).ToList(),
-                Total = RoundMillisecondsToHours(totalTime)
-            };
+            SortItems(report.Items);
+            return report;
         }
 
-        private decimal RoundMillisecondsToHours(long ms)
+        private void SortItems(List<Report.Item> items)
         {
-            if (_rounding == 0m)
-                return ms / 3600000m;
-
-            var roundingFactor = (long) (3600000 * _rounding);
-            ms = ms / roundingFactor * roundingFactor;
-            return ms / 3600000m;
+            items.Sort((a,b) => StringComparer.OrdinalIgnoreCase.Compare(a.Tag, b.Tag));
+            foreach (var i in items)
+                SortItems(i.Children);
         }
     }
 }
