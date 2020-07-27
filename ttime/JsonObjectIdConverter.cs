@@ -1,17 +1,14 @@
 ﻿using System;
 using LiteDB;
 using Newtonsoft.Json;
+using JsonReader = Newtonsoft.Json.JsonReader;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
+using JsonWriter = Newtonsoft.Json.JsonWriter;
 
 namespace ttime
 {
     public class JsonObjectIdConverter : JsonConverter<ObjectId>
     {
-        public override void WriteJson(JsonWriter writer, ObjectId value, JsonSerializer serializer)
-        {
-            writer.WriteValue(value.ToString());
-        }
-
         public override ObjectId ReadJson(
             JsonReader reader,
             Type objectType,
@@ -32,6 +29,11 @@ namespace ttime
 
             var sval = reader.Value?.ToString();
             return string.IsNullOrEmpty(sval) ? null : new ObjectId(sval);
+        }
+
+        public override void WriteJson(JsonWriter writer, ObjectId value, JsonSerializer serializer)
+        {
+            writer.WriteValue(value.ToString());
         }
     }
 }
