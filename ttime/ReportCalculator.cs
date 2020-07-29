@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ttime
 {
@@ -12,6 +13,7 @@ namespace ttime
         private readonly DayOfWeek _startOfWeek;
         private readonly decimal _rounding;
         private readonly bool _daily;
+        private readonly List<string> _tags;
 
         public ReportCalculator(
             Storage storage,
@@ -20,7 +22,8 @@ namespace ttime
             DateTime toDate,
             DayOfWeek startOfWeek,
             decimal rounding,
-            bool daily = false)
+            bool daily = false,
+            List<string> tags = null)
         {
             _storage = storage;
             _period = period;
@@ -29,6 +32,7 @@ namespace ttime
             _startOfWeek = startOfWeek;
             _rounding = rounding;
             _daily = daily;
+            _tags = tags ?? new List<string>(0);
         }
 
         public IEnumerable<Report> CreateReport()
@@ -68,13 +72,17 @@ namespace ttime
             };
             foreach (var entry in entries)
             {
-                if (previousEntry != null && !previousEntry.Stopped)
+                if (previousEntry != null && !previousEntry.Stopped &&
+                    (_tags.Count == 0 || previousEntry.Tags.Any(pt => _tags.Any(t => t.EqualsOIC(pt)))))
+                {
                     report.Add(previousEntry.Tags, (long) (entry.Time - previousEntry.Time).TotalMilliseconds);
+                }
 
                 previousEntry = entry;
             }
 
-            if (previousEntry != null && !previousEntry.Stopped)
+            if (previousEntry != null && !previousEntry.Stopped &&
+                (_tags.Count == 0 || previousEntry.Tags.Any(pt => _tags.Any(t => t.EqualsOIC(pt)))))
             {
                 var nextEntry = _storage.GetNextEntry(previousEntry);
                 var endTime = nextEntry?.Time ?? DateTime.Now;

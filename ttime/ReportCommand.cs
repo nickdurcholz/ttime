@@ -184,7 +184,8 @@ namespace ttime
                 toDate,
                 Configuration.StartOfWeek,
                 Configuration.RoundingPrecision,
-                daily);
+                daily,
+                tags);
             var formatter = Formatter.Create(format);
 
             var reports = calculator.CreateReport();
@@ -200,7 +201,7 @@ namespace ttime
 
             try
             {
-                formatter.Write(reports, reportOut, nestingLevel, tags);
+                formatter.Write(reports, reportOut, nestingLevel);
             }
             finally
             {

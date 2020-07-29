@@ -10,7 +10,7 @@ namespace ttime
 {
     public class XmlFormatter : Formatter
     {
-        public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel, List<string> tags)
+        public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel)
         {
             var elements = reports.Select(CreateReportElement).ToArray();
             var root = elements.Length == 1 ? elements[0] : new XElement("reports", elements);

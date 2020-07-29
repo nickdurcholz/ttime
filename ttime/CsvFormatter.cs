@@ -9,9 +9,9 @@ namespace ttime
 {
     public class CsvFormatter : Formatter
     {
-        public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel, List<string> tags)
+        public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel)
         {
-            var rows = reports.SelectMany(r => GetRows(r, tags)).ToList();
+            var rows = reports.SelectMany(r => GetRows(r)).ToList();
             var maxcols = rows.Max(r => r.Length);
             var headers = new List<string> { "Report Start", "Report End", "Hours" };
             for (int i = 0; i < maxcols-3; i++)
@@ -21,10 +21,10 @@ namespace ttime
             CsvWriter.Write(@out, headers.ToArray(), rows);
         }
 
-        private IEnumerable<string[]> GetRows(Report report, List<string> tags)
+        private IEnumerable<string[]> GetRows(Report report)
         {
             Stack<Report.Item> stack = new Stack<Report.Item>();
-            var itemsInScope = EnumerateItems(report.Items, tags);
+            var itemsInScope = EnumerateItems(report.Items);
             return itemsInScope.Select(i =>
             {
                 var list = new List<string>
@@ -52,14 +52,12 @@ namespace ttime
                 yield return stack.Pop().Tag;
         }
 
-        private IEnumerable<Report.Item> EnumerateItems(List<Report.Item> items, List<string> tags)
+        private IEnumerable<Report.Item> EnumerateItems(List<Report.Item> items)
         {
             foreach (var item in items)
             {
-                if (tags == null || tags.Count == 0 || tags.Any(t => t.EqualsOIC(item.Tag)))
-                    yield return item;
-
-                foreach (var c in EnumerateItems(item.Children, tags))
+                yield return item;
+                foreach (var c in EnumerateItems(item.Children))
                     yield return c;
             }
         }

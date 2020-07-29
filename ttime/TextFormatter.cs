@@ -7,13 +7,13 @@ namespace ttime
 {
     public class TextFormatter : Formatter
     {
-        public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel, List<string> tags)
+        public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel)
         {
             foreach(var report in reports)
-                Write(report, @out, (nestingLevel ?? 2) - 1, tags);
+                Write(report, @out, (nestingLevel ?? 2) - 1);
         }
 
-        private void Write(Report report, TextWriter @out, int maxNesting, List<string> tags)
+        private void Write(Report report, TextWriter @out, int maxNesting)
         {
             if (report.Items.Count == 0)
             {
@@ -29,21 +29,14 @@ namespace ttime
 
                 List<(string name, decimal hours, int nesting)> lines = new List<(string name, decimal hours, int nesting)>();
 
-                if (tags == null || tags.Count == 0)
+                if (maxNesting <= 0)
                 {
-                    if (maxNesting <= 0)
-                    {
-                        lines.AddRange(EnumerateLeaves(report.Items, 0, new List<string>()));
-                    }
-                    else
-                    {
-                        foreach (var item in report.Items)
-                            lines.AddRange(GetHeirarchicalLines(item, maxNesting));
-                    }
+                    lines.AddRange(EnumerateLeaves(report.Items, 0, new List<string>()));
                 }
                 else
                 {
-                    lines.AddRange(GetTagLines(report.Items, tags));
+                    foreach (var item in report.Items)
+                        lines.AddRange(GetHeirarchicalLines(item, maxNesting));
                 }
 
                 int maxNameLength = lines.Max(l => l.name.Length);
@@ -66,29 +59,6 @@ namespace ttime
                 @out.WriteAndPad("Total", hoursStartsAt);
                 @out.WriteLine(report.Hours.ToString("N"));
                 @out.WriteLine();
-            }
-        }
-
-        private IEnumerable<(string name, decimal hours, int nesting)> GetTagLines(List<Report.Item> items, List<string> tags)
-        {
-            foreach (var item in items)
-            {
-                if (tags.Any(t => t.EqualsOIC(item.Tag)))
-                {
-                    var names = new List<string>();
-                    var current = item;
-                    while (current != null)
-                    {
-                        names.Add(current.Tag);
-                        current = current.Parent;
-                    }
-
-                    names.Reverse();
-                    yield return (string.Join(' ', names), item.Hours, 0);
-                }
-
-                foreach (var line in GetTagLines(item.Children, tags))
-                    yield return line;
             }
         }
 

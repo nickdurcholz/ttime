@@ -7,7 +7,7 @@ namespace ttime
 {
     public class JsonFormatter : Formatter
     {
-        public override void Write(IEnumerable<Report> report, TextWriter @out, int? nestingLevel, List<string> tags)
+        public override void Write(IEnumerable<Report> report, TextWriter @out, int? nestingLevel)
         {
             var ls = report as IList<Report> ?? report.ToList();
             if (ls.Count == 1)
