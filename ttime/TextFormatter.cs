@@ -10,10 +10,10 @@ namespace ttime
         public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel)
         {
             foreach(var report in reports)
-                Write(report, @out, (nestingLevel ?? 2) - 1);
+                Write(report, @out, nestingLevel);
         }
 
-        private void Write(Report report, TextWriter @out, int maxNesting)
+        private void Write(Report report, TextWriter @out, int? maxNesting)
         {
             if (report.Items.Count == 0)
             {
@@ -62,7 +62,7 @@ namespace ttime
             }
         }
 
-        private IEnumerable<(string name, decimal hours, int nesting)> GetHeirarchicalLines(Report.Item item, int maxNesting, int nestingLevel = 0)
+        private IEnumerable<(string name, decimal hours, int nesting)> GetHeirarchicalLines(Report.Item item, int? maxNesting, int nestingLevel = 0)
         {
             var names = new List<string> {item.Tag};
             var current = item;
@@ -73,7 +73,7 @@ namespace ttime
             }
 
             yield return (new string(' ', nestingLevel * 2) + string.Join(' ', names), current.Hours, nestingLevel);
-            if (nestingLevel >= maxNesting)
+            if (maxNesting != null && nestingLevel >= maxNesting - 1)
             {
                 foreach (var result in EnumerateLeaves(current.Children, nestingLevel + 1, new List<string>()))
                     yield return result;
