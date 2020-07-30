@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ttime
 {
@@ -13,7 +14,7 @@ namespace ttime
         private readonly DayOfWeek _startOfWeek;
         private readonly decimal _rounding;
         private readonly bool _daily;
-        private readonly List<string> _tags;
+        private readonly List<Regex> _tags;
 
         public ReportCalculator(
             Storage storage,
@@ -32,7 +33,9 @@ namespace ttime
             _startOfWeek = startOfWeek;
             _rounding = rounding;
             _daily = daily;
-            _tags = tags ?? new List<string>(0);
+            _tags = tags == null
+                ? new List<Regex>(0)
+                : tags.Select(t => new Regex(t, RegexOptions.IgnoreCase)).ToList();
         }
 
         public IEnumerable<Report> CreateReport()
@@ -73,7 +76,7 @@ namespace ttime
             foreach (var entry in entries)
             {
                 if (previousEntry != null && !previousEntry.Stopped &&
-                    (_tags.Count == 0 || previousEntry.Tags.Any(pt => _tags.Any(t => t.EqualsOIC(pt)))))
+                    (_tags.Count == 0 || previousEntry.Tags.Any(pt => _tags.Any(t => t.IsMatch(pt)))))
                 {
                     report.Add(previousEntry.Tags, (long) (entry.Time - previousEntry.Time).TotalMilliseconds);
                 }
@@ -82,7 +85,7 @@ namespace ttime
             }
 
             if (previousEntry != null && !previousEntry.Stopped &&
-                (_tags.Count == 0 || previousEntry.Tags.Any(pt => _tags.Any(t => t.EqualsOIC(pt)))))
+                (_tags.Count == 0 || previousEntry.Tags.Any(pt => _tags.Any(t => t.IsMatch(pt)))))
             {
                 var nextEntry = _storage.GetNextEntry(previousEntry);
                 var endTime = nextEntry?.Time ?? DateTime.Now;

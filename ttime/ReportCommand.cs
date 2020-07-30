@@ -230,6 +230,10 @@ namespace ttime
             Out.WriteLine();
             Out.WriteLine("    specify daily=y to display a separate report for each day");
             Out.WriteLine("    contained in the requested period.");
+            Out.WriteLine();
+            Out.WriteLine("    When providing a tag list to report on, tag names are interpreted");
+            Out.WriteLine("    as a regular expression. Hours that are tagged with a tag that ");
+            Out.WriteLine("    matches any of the provided expressions are reported.");
         }
 
         public override string Name => "report";
