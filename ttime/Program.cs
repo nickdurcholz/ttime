@@ -23,6 +23,7 @@ namespace ttime
             new AliasCommand(),
             new RemoveCommand(),
             new StopTimeCommand(),
+            new EditCommand(),
         };
 
         static void Main(string[] args)

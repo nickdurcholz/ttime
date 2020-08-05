@@ -101,5 +101,11 @@ namespace ttime
         {
             AliasCollection.Delete(@alias.Id);
         }
+
+        public TimeEntry this[string id] => TimeCollection.FindById(new ObjectId(id));
+
+        public TimeEntry GetLastEntry(int offset) => TimeCollection
+            .Find(Query.All(nameof(TimeEntry.Time), Query.Descending), offset, 1)
+            .SingleOrDefault();
     }
 }
