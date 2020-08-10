@@ -38,11 +38,20 @@ namespace ttime
             }
 
             var dbPath = GetDbPath();
-            _db = new LiteDatabase(new ConnectionString
+            try
             {
-                Filename = dbPath,
-                Upgrade = false,
-            });
+                _db = new LiteDatabase(new ConnectionString
+                {
+                    Filename = dbPath,
+                    Upgrade = false,
+                });
+            }
+            catch (LiteException ex) when (ex.ErrorCode == 103)
+            {
+                Console.Error.WriteLine($"Data file is out-of-date. Please run '{new UpgradeDbCommand().Name}' to upgrade data file to the current version.");
+                return;
+            }
+
             using (_db)
             {
                 var storage = new Storage(_db);
