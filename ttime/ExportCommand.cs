@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ttime
 {
@@ -23,7 +24,7 @@ namespace ttime
             for (var i = 0; i < args.Length; i++)
             {
                 var arg = args[i];
-                if (Enum.TryParse(arg, true, out period))
+                if (Enum.TryParse<ReportingPeriod>(arg, true, out var p))
                 {
                     if (periodFound)
                     {
@@ -32,6 +33,7 @@ namespace ttime
                         continue;
                     }
 
+                    period = p;
                     periodFound = true;
                     continue;
                 }
@@ -164,10 +166,10 @@ namespace ttime
             var formatter = Formatter.Create(format);
 
             var (start, end) = DateTimeUtility.ExpandPeriod(period, Configuration.StartOfWeek, fromDate, toDate);
-            var entries = Storage.ListTimeEntries(start, end);
+            var entries = Storage.ListTimeEntries(start, end).ToList();
             if (tags.Count > 0)
             {
-                entries = entries.Where(e => e.Stopped || e.Tags.Any(et => tags.Contains(et)));
+                entries.RemoveAll(e => !e.Stopped && e.Tags.All(et => tags.All(t => !Regex.IsMatch(et, t))));
             }
 
             TextWriter reportOut = Out;
