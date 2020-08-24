@@ -66,7 +66,7 @@ namespace ttime
         {
             var names = new List<string> {item.Tag};
             var current = item;
-            while (current.Children.Count == 1)
+            while (current.Children.Count == 1 && current.Children[0].Milliseconds == current.Milliseconds)
             {
                 current = current.Children[0];
                 names.Add(current.Tag);
@@ -78,7 +78,7 @@ namespace ttime
                 foreach (var result in EnumerateLeaves(current.Children, nestingLevel + 1, new List<string>()))
                     yield return result;
             }
-            else if (current.Children.Count > 1)
+            else
             {
                 foreach (var result in current.Children.SelectMany(c => GetHeirarchicalLines(c, maxNesting, nestingLevel + 1)))
                     yield return result;
