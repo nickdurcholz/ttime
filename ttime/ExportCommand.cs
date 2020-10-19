@@ -169,7 +169,7 @@ namespace ttime
             var entries = Storage.ListTimeEntries(start, end).ToList();
             if (tags.Count > 0)
             {
-                entries.RemoveAll(e => !e.Stopped && e.Tags.All(et => tags.All(t => !Regex.IsMatch(et, t))));
+                entries.RemoveAll(e => e.Tags.All(et => tags.All(t => !Regex.IsMatch(et, t))));
             }
 
             TextWriter reportOut = Out;
