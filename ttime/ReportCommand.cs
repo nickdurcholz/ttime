@@ -102,7 +102,7 @@ namespace ttime
 
                     formatFound = true;
                 }
-                else if (arg.StartsWith("rounding="))
+                else if (arg.StartsWith("round="))
                 {
                     if (roundingPrecisionFound)
                     {
@@ -111,16 +111,16 @@ namespace ttime
                         continue;
                     }
 
-                    if (arg.Length == 9)
+                    if (arg.Length == 6)
                     {
-                        Error.WriteLine("Invalid rounding: " + arg);
+                        Error.WriteLine("Invalid rounding factor: " + arg);
                         valid = false;
                         continue;
                     }
 
-                    if (!decimal.TryParse(arg.Substring(9), out roundingPrecision))
+                    if (!decimal.TryParse(arg.Substring(6), out roundingPrecision))
                     {
-                        Error.WriteLine("Invalid rounding: " + arg);
+                        Error.WriteLine("Invalid rounding factor: " + arg);
                         valid = false;
                         continue;
                     }
