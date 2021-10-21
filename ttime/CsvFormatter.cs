@@ -23,7 +23,7 @@ namespace ttime
 
         private IEnumerable<string[]> GetRows(Report report)
         {
-            Stack<Report.Item> stack = new Stack<Report.Item>();
+            Stack<Item> stack = new Stack<Item>();
             var itemsInScope = EnumerateItems(report.Items);
             return itemsInScope.Select(i =>
             {
@@ -38,7 +38,7 @@ namespace ttime
             });
         }
 
-        private IEnumerable<string> EnumerateTags(Report.Item item, Stack<Report.Item> stack)
+        private IEnumerable<string> EnumerateTags(Item item, Stack<Item> stack)
         {
             while (item != null)
             {
@@ -52,12 +52,12 @@ namespace ttime
                 yield return stack.Pop().Tag;
         }
 
-        private IEnumerable<Report.Item> EnumerateItems(List<Report.Item> items)
+        private IEnumerable<Item> EnumerateItems(List<Item> items)
         {
             foreach (var item in items)
             {
                 yield return item;
-                foreach (var c in EnumerateItems(item.Children))
+                foreach (var c in EnumerateItems(item.Items))
                     yield return c;
             }
         }

@@ -45,12 +45,16 @@ namespace ttime
             {
                 var currentStart = start;
                 var currentEnd = start.Date.AddDays(1);
+                var roundingError = 0L;
                 if (currentEnd > end)
                     currentEnd = end;
 
                 while (currentStart < end)
                 {
-                    yield return CreateSingleReport(currentStart, currentEnd);
+                    var x = CreateSingleReport(currentStart, currentEnd, roundingError);
+                    roundingError = x.roundingError;
+                    yield return x.report;
+
                     currentStart = currentEnd;
                     currentEnd = currentEnd.AddDays(1);
                     if (currentEnd > end)
@@ -59,16 +63,16 @@ namespace ttime
             }
             else
             {
-                yield return CreateSingleReport(start, end);
+                yield return CreateSingleReport(start, end, 0L).report;
             }
         }
 
-        private Report CreateSingleReport(DateTime start, DateTime end)
+        private (Report report, long roundingError) CreateSingleReport(DateTime start, DateTime end, long roundingError)
         {
             var entries = _storage.ListTimeEntries(start, end);
 
             var previousEntry = default(TimeEntry);
-            var report = new Report(_rounding)
+            var report = new Report
             {
                 Start = start,
                 End = end
@@ -94,14 +98,16 @@ namespace ttime
             }
 
             SortItems(report.Items);
-            return report;
+
+            roundingError = report.SetRoundedHours(roundingError, _rounding);
+            return (report, roundingError);
         }
 
-        private void SortItems(List<Report.Item> items)
+        private void SortItems(List<Item> items)
         {
             items.Sort((a,b) => StringComparer.OrdinalIgnoreCase.Compare(a.Tag, b.Tag));
             foreach (var i in items)
-                SortItems(i.Children);
+                SortItems(i.Items);
         }
     }
 }

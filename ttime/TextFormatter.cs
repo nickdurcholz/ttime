@@ -62,41 +62,41 @@ namespace ttime
             }
         }
 
-        private IEnumerable<(string name, decimal hours, int nesting)> GetHeirarchicalLines(Report.Item item, int? maxNesting, int nestingLevel = 0)
+        private IEnumerable<(string name, decimal hours, int nesting)> GetHeirarchicalLines(Item item, int? maxNesting, int nestingLevel = 0)
         {
             var names = new List<string> {item.Tag};
             var current = item;
-            while (current.Children.Count == 1 && current.Children[0].Milliseconds == current.Milliseconds)
+            while (current.Items.Count == 1 && current.Items[0].Milliseconds == current.Milliseconds)
             {
-                current = current.Children[0];
+                current = current.Items[0];
                 names.Add(current.Tag);
             }
 
             yield return (new string(' ', nestingLevel * 2) + string.Join(' ', names), current.Hours, nestingLevel);
             if (maxNesting != null && nestingLevel >= maxNesting - 1)
             {
-                foreach (var result in EnumerateLeaves(current.Children, nestingLevel + 1, new List<string>()))
+                foreach (var result in EnumerateLeaves(current.Items, nestingLevel + 1, new List<string>()))
                     yield return result;
             }
             else
             {
-                foreach (var result in current.Children.SelectMany(c => GetHeirarchicalLines(c, maxNesting, nestingLevel + 1)))
+                foreach (var result in current.Items.SelectMany(c => GetHeirarchicalLines(c, maxNesting, nestingLevel + 1)))
                     yield return result;
             }
         }
 
-        private IEnumerable<(string name, decimal hours, int nesting)> EnumerateLeaves(List<Report.Item> children, int nestingLevel, List<string> names)
+        private IEnumerable<(string name, decimal hours, int nesting)> EnumerateLeaves(List<Item> children, int nestingLevel, List<string> names)
         {
             foreach (var c in children)
             {
                 names.Add(c.Tag);
-                if (c.Children.Count == 0)
+                if (c.Items.Count == 0)
                 {
                     yield return (new string(' ', nestingLevel * 2) + string.Join(' ', names), c.Hours, nestingLevel);
                 }
                 else
                 {
-                    foreach (var result in EnumerateLeaves(c.Children, nestingLevel, names))
+                    foreach (var result in EnumerateLeaves(c.Items, nestingLevel, names))
                         yield return result;
                 }
                 names.RemoveAt(names.Count - 1);

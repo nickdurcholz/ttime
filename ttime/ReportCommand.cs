@@ -15,6 +15,8 @@ namespace ttime
             DateTime toDate = default;
             var daily = false;
             int? nestingLevel = null;
+            decimal roundingPrecision = Configuration.RoundingPrecision;
+            bool roundingPrecisionFound = false;
 
             var periodFound = false;
             var formatFound = false;
@@ -100,6 +102,31 @@ namespace ttime
 
                     formatFound = true;
                 }
+                else if (arg.StartsWith("rounding="))
+                {
+                    if (roundingPrecisionFound)
+                    {
+                        Error.WriteLine("Duplicate rounding specification found: " + arg);
+                        valid = false;
+                        continue;
+                    }
+
+                    if (arg.Length == 9)
+                    {
+                        Error.WriteLine("Invalid rounding: " + arg);
+                        valid = false;
+                        continue;
+                    }
+
+                    if (!decimal.TryParse(arg.Substring(9), out roundingPrecision))
+                    {
+                        Error.WriteLine("Invalid rounding: " + arg);
+                        valid = false;
+                        continue;
+                    }
+
+                    roundingPrecisionFound = true;
+                }
                 else if (arg.StartsWith("daily="))
                 {
                     if (outFile != null)
@@ -183,7 +210,7 @@ namespace ttime
                 fromDate,
                 toDate,
                 Configuration.StartOfWeek,
-                Configuration.RoundingPrecision,
+                roundingPrecision,
                 daily,
                 tags);
             var formatter = Formatter.Create(format);
@@ -219,7 +246,7 @@ namespace ttime
             Out.WriteLine("usage: ttime report [<day-of-week> | lastWeek | yesterday | today |");
             Out.WriteLine("                    <date> | week | all | from=<date-time>");
             Out.WriteLine("                    [to=<date-time>]] [format=text|csv|xml|json]");
-            Out.WriteLine("                    [n=3] [daily=y|n] [out=<file>] [tag]...");
+            Out.WriteLine("                    [n=3] [daily=y|n] [out=<file>] [round=x] [tag]...");
             Out.WriteLine();
             Out.WriteLine("    Print a report of how time was spent for a given period. When");
             Out.WriteLine("    invoked without specifying a period, the default period specified");

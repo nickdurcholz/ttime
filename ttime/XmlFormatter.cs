@@ -36,7 +36,7 @@ namespace ttime
             return reportElement;
         }
 
-        private static void AddSubTasks(List<Report.Item> items, XElement container)
+        private static void AddSubTasks(List<Item> items, XElement container)
         {
             foreach (var item in items)
             {
@@ -45,7 +45,7 @@ namespace ttime
                     new XAttribute("name", item.Tag),
                     new XAttribute("hours", item.Hours));
                 container.Add(task);
-                AddSubTasks(item.Children, task);
+                AddSubTasks(item.Items, task);
             }
         }
 
