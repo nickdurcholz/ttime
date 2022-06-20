@@ -6,17 +6,17 @@ namespace ttime
 {
     public abstract class Formatter
     {
-        public static Formatter Create(Format format)
+        public static Formatter Create(OutputFormat format, TimeFormat timeFormat)
         {
             switch (format)
             {
-                case Format.Text:
-                    return new TextFormatter();
-                case Format.Csv:
+                case OutputFormat.Text:
+                    return new TextFormatter(new TimeFormatter(timeFormat));
+                case OutputFormat.Csv:
                     return new CsvFormatter();
-                case Format.Xml:
+                case OutputFormat.Xml:
                     return new XmlFormatter();
-                case Format.Json:
+                case OutputFormat.Json:
                     return new JsonFormatter();
                 default:
                     return null;

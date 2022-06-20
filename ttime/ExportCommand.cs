@@ -11,7 +11,7 @@ namespace ttime
         public override void Run(Span<string> args)
         {
             ReportingPeriod period = default;
-            Format format = default;
+            OutputFormat format = default;
             string outFile = null;
             DateTime fromDate = default;
             DateTime toDate = default;
@@ -163,7 +163,7 @@ namespace ttime
             if (toDate == default)
                 toDate = DateTime.Now;
 
-            var formatter = Formatter.Create(format);
+            var formatter = Formatter.Create(format, Configuration.TimeFormat);
 
             var (start, end) = DateTimeUtility.ExpandPeriod(period, Configuration.StartOfWeek, fromDate, toDate);
             var entries = Storage.ListTimeEntries(start, end).ToList();

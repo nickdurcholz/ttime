@@ -9,7 +9,7 @@ namespace ttime
     {
         public override void Run(Span<string> args)
         {
-            Format format = default;
+            OutputFormat format = default;
             bool formatFound = false;
             string file = null;
             bool valid = true;
@@ -64,23 +64,23 @@ namespace ttime
             {
                 var extension = Path.GetExtension(file);
                 if (".csv".EqualsOIC(extension))
-                    format = Format.Csv;
+                    format = OutputFormat.Csv;
                 else if (".xml".EqualsOIC(extension))
-                    format = Format.Xml;
+                    format = OutputFormat.Xml;
                 else if (".json".EqualsOIC(extension))
-                    format = Format.Json;
+                    format = OutputFormat.Json;
                 else
                     format = Configuration.DefaultExportFormat;
             }
 
-            if (format == Format.Text)
+            if (format == OutputFormat.Text)
             {
                 Error.WriteLine("The text formatter cannot be used with the import command. " +
                                 "Please specify a different formatter with format=<xml|json|csv>.");
                 return;
             }
 
-            var formatter = Formatter.Create(format);
+            var formatter = Formatter.Create(format, Configuration.TimeFormat);
             List<TimeEntry> entries;
             var importReader = In;
             if (file != null)

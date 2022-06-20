@@ -71,6 +71,15 @@ namespace ttime
         {
             //This function takes the mental gymnastics out of entering accurate-as-possible time into a system that requires you
             //to do silly things like round to the nearest quarter hour.
+            //
+            //This rounding method differs from simple midpoint rounding in that it tries to make sure that the accumulated error
+            //for the entire report is as small as possible. For example, if you are rounding to the nearest 15 minutes, then
+            //simply using the midpoint rounding rule may round 10 entries down and only two up, making it seem as if you are
+            //reporting up to an hour less time than was actually recorded.
+            //
+            //This method feeds the rounding error from one entry into the next so that we can make a better decision to round up
+            //or down. Using this method, then the total rounding error for a report would be guaranteed to be less than 15 minutes
+            //for the entire report.
 
             foreach (var child in Items)
                 roundingError = child.SetRoundedHours(roundingError, roundingMultiple);

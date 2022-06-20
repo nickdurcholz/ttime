@@ -7,6 +7,13 @@ namespace ttime
 {
     public class TextFormatter : Formatter
     {
+        private readonly TimeFormatter _timeFormatter;
+
+        public TextFormatter(TimeFormatter timeFormatter)
+        {
+            _timeFormatter = timeFormatter;
+        }
+
         public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel)
         {
             foreach(var report in reports)
@@ -47,7 +54,7 @@ namespace ttime
                 {
                     var p = hoursStartsAt + line.nesting * 2;
                     @out.WriteAndPad(line.name, p);
-                    var hours = line.hours.ToString("N");
+                    var hours = _timeFormatter.Format(line.hours);
                     @out.WriteLine(hours);
 
                     maxLineLength = Math.Max(maxLineLength, p + hours.Length);
@@ -57,7 +64,7 @@ namespace ttime
                     @out.Write('-');
                 @out.WriteLine();
                 @out.WriteAndPad("Total", hoursStartsAt);
-                @out.WriteLine(report.Hours.ToString("N"));
+                @out.WriteLine(_timeFormatter.Format(report.Hours));
                 @out.WriteLine();
             }
         }

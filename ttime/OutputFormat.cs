@@ -1,6 +1,6 @@
 ﻿namespace ttime
 {
-    public enum Format
+    public enum OutputFormat
     {
         Text,
         Csv,

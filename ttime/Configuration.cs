@@ -8,20 +8,21 @@ namespace ttime
     {
         private const string DefaultReportingPeriodKey = "defaultReportPeriod";
         private const string DefaultReportFormatKey = "defaultReportFormat";
-        private const string DefaultReportTypeKey = "defaultReportType";
         private const string DefaultExportFormatKey = "defaultExportFormat";
         private const string StartOfWeekKey = "startOfWeek";
         private const string RoundingKey = "rounding";
         private const string HoursPerWeekKey = "hoursPerWeek";
+        private const string TimeFormatKey = "timeFormat";
 
         private readonly Storage _storage;
         private readonly List<ConfigSetting> _settings;
         private ReportingPeriod _defaultReportingPeriod;
-        private Format _defaultReportFormat;
-        private Format _defaultExportFormat;
+        private OutputFormat _defaultReportFormat;
+        private OutputFormat _defaultExportFormat;
         private DayOfWeek _startOfWeek;
         private decimal _roundingPrecision;
         private int _hoursPerWeek;
+        private TimeFormat _timeFormat;
 
         public Configuration(Storage storage)
         {
@@ -37,23 +38,12 @@ namespace ttime
 
             _settings = storage.ListConfigSettings().ToList();
 
-            var value = GetSetting(DefaultReportingPeriodKey, nameof(ReportingPeriod.Yesterday));
-            _defaultReportingPeriod = Enum.Parse<ReportingPeriod>(value, true);
-
-            value = GetSetting(DefaultReportFormatKey, nameof(Format.Text));
-            _defaultReportFormat = Enum.Parse<Format>(value, true);
-
-            value = GetSetting(DefaultExportFormatKey, nameof(Format.Csv));
-            _defaultExportFormat = Enum.Parse<Format>(value, true);
-
-            value = GetSetting(StartOfWeekKey, nameof(DayOfWeek.Monday));
-            _startOfWeek = Enum.Parse<DayOfWeek>(value, true);
-
-            value = GetSetting(RoundingKey, "0");
-            _roundingPrecision = decimal.Parse(value);
-
-            if (!int.TryParse(GetSetting(HoursPerWeekKey), out _hoursPerWeek))
-                _hoursPerWeek = 40;
+            Enum.TryParse(GetSetting(DefaultReportingPeriodKey, nameof(ReportingPeriod.Yesterday)), true, out _defaultReportingPeriod);
+            Enum.TryParse(GetSetting(DefaultReportFormatKey, nameof(OutputFormat.Text)), true, out _defaultReportFormat);
+            Enum.TryParse(GetSetting(DefaultExportFormatKey, nameof(OutputFormat.Csv)), true, out _defaultExportFormat);
+            Enum.TryParse(GetSetting(StartOfWeekKey, nameof(DayOfWeek.Monday)), true, out _startOfWeek);
+            Enum.TryParse(GetSetting(TimeFormatKey, nameof(TimeFormat.DecimalHours)), true, out _timeFormat);
+            decimal.TryParse(GetSetting(RoundingKey, "0"), out _roundingPrecision);
 
             Aliases = storage.ListAliases().ToList();
         }
@@ -80,7 +70,7 @@ namespace ttime
             }
         }
 
-        public Format DefaultReportFormat
+        public OutputFormat DefaultReportFormat
         {
             get => _defaultReportFormat;
             set
@@ -90,7 +80,7 @@ namespace ttime
             }
         }
 
-        public Format DefaultExportFormat
+        public OutputFormat DefaultExportFormat
         {
             get => _defaultExportFormat;
             set
@@ -119,6 +109,17 @@ namespace ttime
                 this[RoundingKey] = value.ToString("F");
             }
         }
+
+        public TimeFormat TimeFormat
+        {
+            get => _timeFormat;
+            set
+            {
+                _timeFormat = value;
+                this[TimeFormatKey] = value.ToString();
+            }
+        }
+
 
         public string this[string name]
         {

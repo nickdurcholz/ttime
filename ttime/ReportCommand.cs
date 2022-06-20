@@ -9,7 +9,7 @@ namespace ttime
         public override void Run(Span<string> args)
         {
             ReportingPeriod period = default;
-            Format format = default;
+            OutputFormat outputFormat = default;
             string outFile = null;
             DateTime fromDate = default;
             DateTime toDate = default;
@@ -17,9 +17,11 @@ namespace ttime
             int? nestingLevel = null;
             decimal roundingPrecision = Configuration.RoundingPrecision;
             bool roundingPrecisionFound = false;
+            TimeFormat timeFormat = Configuration.TimeFormat;
+            bool timeFormatFound = false;
 
             var periodFound = false;
-            var formatFound = false;
+            var outputFormatFound = false;
             var tags = new List<string>();
             var valid = true;
             for (var i = 0; i < args.Length; i++)
@@ -79,7 +81,7 @@ namespace ttime
                 }
                 else if (arg.StartsWith("format="))
                 {
-                    if (formatFound)
+                    if (outputFormatFound)
                     {
                         Error.WriteLine("Duplicate format specification found: " + arg);
                         valid = false;
@@ -93,14 +95,39 @@ namespace ttime
                         continue;
                     }
 
-                    if (!Enum.TryParse(arg.Substring(7), true, out format))
+                    if (!Enum.TryParse(arg.Substring(7), true, out outputFormat))
                     {
                         Error.WriteLine("Invalid format: " + arg);
                         valid = false;
                         continue;
                     }
 
-                    formatFound = true;
+                    outputFormatFound = true;
+                }
+                else if (arg.StartsWith("disp="))
+                {
+                    if (timeFormatFound)
+                    {
+                        Error.WriteLine("Duplicate time format specification found: " + arg);
+                        valid = false;
+                        continue;
+                    }
+
+                    if (arg.Length == 5)
+                    {
+                        Error.WriteLine("Invalid time format: " + arg);
+                        valid = false;
+                        continue;
+                    }
+
+                    if (!Enum.TryParse(arg.Substring(5), true, out timeFormat))
+                    {
+                        Error.WriteLine("Invalid time format: " + arg);
+                        valid = false;
+                        continue;
+                    }
+
+                    timeFormatFound = true;
                 }
                 else if (arg.StartsWith("round="))
                 {
@@ -199,8 +226,8 @@ namespace ttime
 
             if (!periodFound)
                 period = Configuration.DefaultReportingPeriod;
-            if (!formatFound)
-                format = Configuration.DefaultReportFormat;
+            if (!outputFormatFound)
+                outputFormat = Configuration.DefaultReportFormat;
             if (toDate == default)
                 toDate = DateTime.Now;
 
@@ -213,7 +240,7 @@ namespace ttime
                 roundingPrecision,
                 daily,
                 tags);
-            var formatter = Formatter.Create(format);
+            var formatter = Formatter.Create(outputFormat, Configuration.TimeFormat);
 
             var reports = calculator.CreateReport();
 
@@ -246,7 +273,8 @@ namespace ttime
             Out.WriteLine("usage: ttime report [<day-of-week> | lastWeek | yesterday | today |");
             Out.WriteLine("                    <date> | week | all | from=<date-time>");
             Out.WriteLine("                    [to=<date-time>]] [format=text|csv|xml|json]");
-            Out.WriteLine("                    [n=3] [daily=y|n] [out=<file>] [round=x] [tag]...");
+            Out.WriteLine("                    [n=3] [daily=y|n] [out=<file>] [round=x] ");
+            Out.WriteLine("                    [disp=DecimalHours|HoursMinutes] [tag]...");
             Out.WriteLine();
             Out.WriteLine("    Print a report of how time was spent for a given period. When");
             Out.WriteLine("    invoked without specifying a period, the default period specified");
