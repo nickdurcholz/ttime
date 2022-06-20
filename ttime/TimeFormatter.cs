@@ -19,17 +19,18 @@ namespace ttime
             var ts = TimeSpan.FromHours((double)hours);
             var h = (int)ts.TotalHours;
             var m = (int)Math.Round(ts.TotalMinutes) - h * 60;
+            string hourMinute;
             if (h == 0)
-                return $"{m}m";
-            if (m == 0)
-                return $"{h}h";
-            return $"{h}h {m}m";
-        }
-    }
+                hourMinute = $"{m}m";
+            else if (m == 0)
+                hourMinute = $"{h}h";
+            else
+                hourMinute =$"{h}h {m}m";
 
-    public enum TimeFormat
-    {
-        DecimalHours,
-        HoursMinutes
+            if (_format == TimeFormat.HoursMinutes)
+                return hourMinute;
+
+            return $"{hours.ToString("N")} ({hourMinute})";
+        }
     }
 }
