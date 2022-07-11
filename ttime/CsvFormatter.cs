@@ -31,6 +31,12 @@ namespace ttime
                 PopulateRows(report, data, i++);
             }
 
+            var k = data.Max(kvp => kvp.Value.Count);
+            foreach (var kvp in data)
+            {
+                for (i = kvp.Value.Count; i < k; i++)
+                    kvp.Value.Add(0m);
+            }
             var rows = data.Select(kvp => new[] { kvp.Key }.Concat(kvp.Value.Select(h => Math.Round(h, 2).ToString(CultureInfo.CurrentCulture))).ToArray());
             return (headers.ToArray(), rows);
         }
