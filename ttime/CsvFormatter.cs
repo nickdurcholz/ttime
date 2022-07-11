@@ -12,7 +12,7 @@ namespace ttime
     {
         public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel)
         {
-            var headers = new List<string> { "Tags", "Hours" };
+            var headers = new List<string> { "Tags" };
             var data = new SortedList<string, List<decimal>>();
             int i = 0;
             foreach (var report in reports)
@@ -39,7 +39,7 @@ namespace ttime
                     hours = new List<decimal>();
                     rowData.Add(tagLine, hours);
                 }
-                for (int i = 0; i < index; i++)
+                for (int i = hours.Count; i < index; i++)
                     hours.Add(0m);
                 hours.Add(item.HoursExcludingChildren);
             }
