@@ -8,16 +8,14 @@ namespace ttime
 {
     public class Report : TimeContainer
     {
-        private static readonly IReadOnlyList<string> UnspecifiedTags = new[] { "unspecified" };
-
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
 
         public void Add(IReadOnlyList<string> tags, long milliseconds)
         {
-            tags ??= UnspecifiedTags;
+            tags ??= new[] { UnspecifiedTag };
             var items = Items;
-            Item parent = null;
+            ReportItem parent = null;
             foreach (var tag in tags)
             {
                 var item = GetOrCreateItem(tag, items, parent);
@@ -29,12 +27,12 @@ namespace ttime
             Milliseconds += milliseconds;
         }
 
-        private Item GetOrCreateItem(string tag, List<Item> items, Item parent)
+        private ReportItem GetOrCreateItem(string tag, List<ReportItem> items, ReportItem parent)
         {
             var item = items.FirstOrDefault(i => i.Tag == tag);
             if (item == null)
             {
-                item = new Item { Tag = tag, Parent = parent };
+                item = new ReportItem { Tag = tag, Parent = parent };
                 items.Add(item);
             }
 
@@ -43,19 +41,26 @@ namespace ttime
     }
 
     [DebuggerDisplay("{Tag} - {Hours}")]
-    public class Item : TimeContainer
+    public class ReportItem : TimeContainer
     {
         public string Tag { get; set; }
 
         [JsonIgnore]
-        public Item Parent { get; set; }
+        public ReportItem Parent { get; set; }
+
+        public string TagLine => Parent == null || Parent.TagLine == null ? Tag : $"{Parent.TagLine} {Tag}";
     }
 
     public class TimeContainer
     {
         private const decimal MsPerHour = 3600000m;
-        public List<Item> Items { get; } = new List<Item>();
+        protected const string UnspecifiedTag = "unspecified";
+        private long _roundToNearestMs = 1;
+
+        public List<ReportItem> Items { get; } = new();
         public long Milliseconds { get; set; }
+        public long MillisecondsExcludingChildren => Math.Max(0L, Milliseconds - Items.Sum(i => i.Milliseconds));
+        public decimal HoursExcludingChildren => GetRoundedMilliseconds(MillisecondsExcludingChildren, _roundToNearestMs) / MsPerHour;
         public decimal Hours { get; set; }
 
         /// <summary>
@@ -67,7 +72,7 @@ namespace ttime
         /// <returns>Returns the total rounding error in milliseconds</returns>
         public long SetRoundedHours(long roundingError, decimal roundingFactor) => SetRoundedHours(roundingError, (long)(MsPerHour * Math.Abs(roundingFactor)));
 
-        private long SetRoundedHours(long roundingError, long roundingMultiple)
+        private long SetRoundedHours(long roundingError, long roundToNearestMs)
         {
             //This function takes the mental gymnastics out of entering accurate-as-possible time into a system that requires you
             //to do silly things like round to the nearest quarter hour.
@@ -80,19 +85,20 @@ namespace ttime
             //This method feeds the rounding error from one entry into the next so that we can make a better decision to round up
             //or down. Using this method, then the total rounding error for a report would be guaranteed to be less than 15 minutes
             //for the entire report.
+            _roundToNearestMs = roundToNearestMs;
 
             foreach (var child in Items)
-                roundingError = child.SetRoundedHours(roundingError, roundingMultiple);
+                roundingError = child.SetRoundedHours(roundingError, roundToNearestMs);
 
-            if (roundingMultiple > 0)
+            if (roundToNearestMs > 0)
             {
                 var timeExcludingChildren = Math.Max(0L, Milliseconds - Items.Sum(i => i.Milliseconds));
-                var roundedMs = GetRoundedMilliseconds(timeExcludingChildren, roundingMultiple);
+                var roundedMs = GetRoundedMilliseconds(timeExcludingChildren, roundToNearestMs);
                 var myError = roundedMs - timeExcludingChildren;
-                if (roundingError + myError > roundingMultiple)
-                    roundedMs -= roundingMultiple;
-                else if (roundingError + myError < -roundingMultiple)
-                    roundedMs += roundingMultiple;
+                if (roundingError + myError > roundToNearestMs)
+                    roundedMs -= roundToNearestMs;
+                else if (roundingError + myError < -roundToNearestMs)
+                    roundedMs += roundToNearestMs;
 
                 Hours = roundedMs / MsPerHour + Items.Sum(i => i.Hours);
 
@@ -103,12 +109,12 @@ namespace ttime
             return 0;
         }
 
-        private static long GetRoundedMilliseconds(long ms, long roundingMultiple)
+        private static long GetRoundedMilliseconds(long ms, long roundToNearestMs)
         {
-            var floor = ms / roundingMultiple * roundingMultiple;
-            var midpoint = roundingMultiple / 2;
+            var floor = ms / roundToNearestMs * roundToNearestMs;
+            var midpoint = roundToNearestMs / 2;
             if (ms - floor > midpoint)
-                return floor + roundingMultiple;
+                return floor + roundToNearestMs;
             return floor;
         }
     }

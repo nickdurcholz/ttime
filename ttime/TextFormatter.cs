@@ -69,7 +69,7 @@ namespace ttime
             }
         }
 
-        private IEnumerable<(string name, decimal hours, int nesting)> GetHeirarchicalLines(Item item, int? maxNesting, int nestingLevel = 0)
+        private IEnumerable<(string name, decimal hours, int nesting)> GetHeirarchicalLines(ReportItem item, int? maxNesting, int nestingLevel = 0)
         {
             var names = new List<string> {item.Tag};
             var current = item;
@@ -92,7 +92,7 @@ namespace ttime
             }
         }
 
-        private IEnumerable<(string name, decimal hours, int nesting)> EnumerateLeaves(List<Item> children, int nestingLevel, List<string> names)
+        private IEnumerable<(string name, decimal hours, int nesting)> EnumerateLeaves(List<ReportItem> children, int nestingLevel, List<string> names)
         {
             foreach (var c in children)
             {

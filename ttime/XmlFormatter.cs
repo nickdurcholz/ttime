@@ -36,7 +36,7 @@ namespace ttime
             return reportElement;
         }
 
-        private static void AddSubTasks(List<Item> items, XElement container)
+        private static void AddSubTasks(List<ReportItem> items, XElement container)
         {
             foreach (var item in items)
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Csv;
@@ -11,54 +12,47 @@ namespace ttime
     {
         public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel)
         {
-            var rows = reports.SelectMany(r => GetRows(r)).ToList();
-            var maxcols = rows.Max(r => r.Length);
-            var headers = new List<string> { "Report Start", "Report End", "Hours" };
-            for (int i = 0; i < maxcols-3; i++)
+            var headers = new List<string> { "Tags", "Hours" };
+            var data = new SortedList<string, List<decimal>>();
+            int i = 0;
+            foreach (var report in reports)
             {
-                headers.Add($"Tag {i}");
+                var reportPeriod = report.End - report.Start == TimeSpan.FromDays(1) && report.Start == report.Start.Date
+                    ? report.Start.ToString("yyyy-MM-dd")
+                    : $"{report.Start:yyyy-MM-dd HH:mm:ss} to {report.End:yyyy-MM-dd HH:mm:ss}";
+                headers.Add(reportPeriod);
+                PopulateRows(report, data, i++);
             }
+
+            var rows = data.Select(kvp => new[] { kvp.Key }.Concat(kvp.Value.Select(h => Math.Round(h, 2).ToString(CultureInfo.CurrentCulture))).ToArray());
             CsvWriter.Write(@out, headers.ToArray(), rows);
         }
 
-        private IEnumerable<string[]> GetRows(Report report)
+        private void PopulateRows(Report report, SortedList<string, List<decimal>> rowData, int index)
         {
-            Stack<Item> stack = new Stack<Item>();
             var itemsInScope = EnumerateItems(report.Items);
-            return itemsInScope.Select(i =>
+            foreach (var item in itemsInScope)
             {
-                var list = new List<string>
+                var tagLine = item.TagLine;
+                if (!rowData.TryGetValue(tagLine, out var hours))
                 {
-                    report.Start.ToString("O"),
-                    report.End.ToString("O"),
-                    i.Hours.ToString("F")
-                };
-                list.AddRange(EnumerateTags(i, stack));
-                return list.ToArray();
-            });
-        }
-
-        private IEnumerable<string> EnumerateTags(Item item, Stack<Item> stack)
-        {
-            while (item != null)
-            {
-                stack.Push(item);
-                item = item.Parent;
+                    hours = new List<decimal>();
+                    rowData.Add(tagLine, hours);
+                }
+                for (int i = 0; i < index; i++)
+                    hours.Add(0m);
+                hours.Add(item.HoursExcludingChildren);
             }
-
-            if (stack.Count == 0)
-                yield return "Unspecified";
-            while (stack.Count > 0)
-                yield return stack.Pop().Tag;
         }
 
-        private IEnumerable<Item> EnumerateItems(List<Item> items)
+        private IEnumerable<ReportItem> EnumerateItems(IEnumerable<ReportItem> items)
         {
             foreach (var item in items)
             {
-                yield return item;
                 foreach (var c in EnumerateItems(item.Items))
                     yield return c;
+                if (item.MillisecondsExcludingChildren > 0)
+                    yield return item;
             }
         }
 

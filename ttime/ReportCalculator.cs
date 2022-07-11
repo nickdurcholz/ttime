@@ -103,7 +103,7 @@ namespace ttime
             return (report, roundingError);
         }
 
-        private void SortItems(List<Item> items)
+        private void SortItems(List<ReportItem> items)
         {
             items.Sort((a,b) => StringComparer.OrdinalIgnoreCase.Compare(a.Tag, b.Tag));
             foreach (var i in items)
