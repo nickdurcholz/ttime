@@ -12,6 +12,12 @@ namespace ttime
     {
         public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel)
         {
+            var (headers, rows) = Generate(reports);
+            CsvWriter.Write(@out, headers, rows);
+        }
+
+        public (string[] headers, IEnumerable<string[]> rows) Generate(IEnumerable<Report> reports)
+        {
             var headers = new List<string> { "Tags" };
             var data = new SortedList<string, List<decimal>>();
             int i = 0;
@@ -20,12 +26,13 @@ namespace ttime
                 var reportPeriod = report.End - report.Start == TimeSpan.FromDays(1) && report.Start == report.Start.Date
                     ? report.Start.ToString("yyyy-MM-dd")
                     : $"{report.Start:yyyy-MM-dd HH:mm:ss} to {report.End:yyyy-MM-dd HH:mm:ss}";
+                headers.Add(reportPeriod + " rollup");
                 headers.Add(reportPeriod);
                 PopulateRows(report, data, i++);
             }
 
             var rows = data.Select(kvp => new[] { kvp.Key }.Concat(kvp.Value.Select(h => Math.Round(h, 2).ToString(CultureInfo.CurrentCulture))).ToArray());
-            CsvWriter.Write(@out, headers.ToArray(), rows);
+            return (headers.ToArray(), rows);
         }
 
         private void PopulateRows(Report report, SortedList<string, List<decimal>> rowData, int index)
@@ -39,8 +46,13 @@ namespace ttime
                     hours = new List<decimal>();
                     rowData.Add(tagLine, hours);
                 }
+
                 for (int i = hours.Count; i < index; i++)
+                {
                     hours.Add(0m);
+                    hours.Add(0m);
+                }
+                hours.Add(item.Hours);
                 hours.Add(item.HoursExcludingChildren);
             }
         }
@@ -49,10 +61,9 @@ namespace ttime
         {
             foreach (var item in items)
             {
+                yield return item;
                 foreach (var c in EnumerateItems(item.Items))
                     yield return c;
-                if (item.MillisecondsExcludingChildren > 0)
-                    yield return item;
             }
         }
 
