@@ -85,7 +85,7 @@ namespace ttime
                 case ReportingPeriod.Month:
                     return (
                         new DateTime(today.Year, today.Month, 1),
-                        new DateTime(today.Year + ((today.Month + 1) / 12), (today.Month + 1) % 12, 1)
+                        new DateTime(today.Year + today.Month / 12, (today.Month + 1) % 13, 1)
                     );
                 case ReportingPeriod.Quarter:
                 {
