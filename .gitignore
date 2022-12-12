@@ -12,3 +12,4 @@ packages/*
 *.lock.json
 .vscode/
 launchSettings.json
+.idea/

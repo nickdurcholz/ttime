@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      dotnet: 6.0
+  pre_build:
+    commands:
+      - echo Nothing to do in the pre_build phase...
+  build:
+    commands:
+      - echo Build started on `date`
+      - dotnet publish -c Release
+      - zip -r ttime/bin/ttime-net6.0-v$CODEBUILD_BUILD_NUMBER.zip ttime/bin/Release/net6.0/publish/*
+  post_build:
+    commands:
+      - echo Build completed on `date`
+artifacts:
+  files:
+    - ttime/bin/*.zip
