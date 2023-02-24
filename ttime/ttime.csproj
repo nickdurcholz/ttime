@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Csv" Version="2.0.84" />
-    <PackageReference Include="LiteDB" Version="5.0.12" />
+    <PackageReference Include="LiteDB" Version="5.0.13" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
