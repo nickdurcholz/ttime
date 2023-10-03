@@ -1,10 +1,9 @@
-﻿namespace ttime
+﻿namespace ttime;
+
+public enum OutputFormat
 {
-    public enum OutputFormat
-    {
-        Text,
-        Csv,
-        Xml,
-        Json
-    }
+    Text,
+    Csv,
+    Xml,
+    Json
 }

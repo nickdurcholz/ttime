@@ -3,111 +3,110 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace ttime
+namespace ttime;
+
+public class ReportCalculator
 {
-    public class ReportCalculator
+    private readonly Storage _storage;
+    private readonly ReportingPeriod _period;
+    private readonly DateTime _fromDate;
+    private readonly DateTime _toDate;
+    private readonly DayOfWeek _startOfWeek;
+    private readonly decimal _rounding;
+    private readonly bool _daily;
+    private readonly List<Regex> _tags;
+
+    public ReportCalculator(
+        Storage storage,
+        ReportingPeriod period,
+        DateTime fromDate,
+        DateTime toDate,
+        DayOfWeek startOfWeek,
+        decimal rounding,
+        bool daily = false,
+        List<string> tags = null)
     {
-        private readonly Storage _storage;
-        private readonly ReportingPeriod _period;
-        private readonly DateTime _fromDate;
-        private readonly DateTime _toDate;
-        private readonly DayOfWeek _startOfWeek;
-        private readonly decimal _rounding;
-        private readonly bool _daily;
-        private readonly List<Regex> _tags;
+        _storage = storage;
+        _period = period;
+        _fromDate = fromDate;
+        _toDate = toDate;
+        _startOfWeek = startOfWeek;
+        _rounding = rounding;
+        _daily = daily;
+        _tags = tags == null
+            ? new List<Regex>(0)
+            : tags.Select(t => new Regex(t, RegexOptions.IgnoreCase)).ToList();
+    }
 
-        public ReportCalculator(
-            Storage storage,
-            ReportingPeriod period,
-            DateTime fromDate,
-            DateTime toDate,
-            DayOfWeek startOfWeek,
-            decimal rounding,
-            bool daily = false,
-            List<string> tags = null)
+    public IEnumerable<Report> CreateReport()
+    {
+        var (start, end) = DateTimeUtility.ExpandPeriod(_period, _startOfWeek, _fromDate, _toDate);
+        if (_daily)
         {
-            _storage = storage;
-            _period = period;
-            _fromDate = fromDate;
-            _toDate = toDate;
-            _startOfWeek = startOfWeek;
-            _rounding = rounding;
-            _daily = daily;
-            _tags = tags == null
-                ? new List<Regex>(0)
-                : tags.Select(t => new Regex(t, RegexOptions.IgnoreCase)).ToList();
-        }
+            var currentStart = start;
+            var currentEnd = start.Date.AddDays(1);
+            var roundingError = 0L;
+            if (currentEnd > end)
+                currentEnd = end;
 
-        public IEnumerable<Report> CreateReport()
-        {
-            var (start, end) = DateTimeUtility.ExpandPeriod(_period, _startOfWeek, _fromDate, _toDate);
-            if (_daily)
+            while (currentStart < end)
             {
-                var currentStart = start;
-                var currentEnd = start.Date.AddDays(1);
-                var roundingError = 0L;
+                var x = CreateSingleReport(currentStart, currentEnd, roundingError);
+                roundingError = x.roundingError;
+                yield return x.report;
+
+                currentStart = currentEnd;
+                currentEnd = currentEnd.AddDays(1);
                 if (currentEnd > end)
                     currentEnd = end;
-
-                while (currentStart < end)
-                {
-                    var x = CreateSingleReport(currentStart, currentEnd, roundingError);
-                    roundingError = x.roundingError;
-                    yield return x.report;
-
-                    currentStart = currentEnd;
-                    currentEnd = currentEnd.AddDays(1);
-                    if (currentEnd > end)
-                        currentEnd = end;
-                }
-            }
-            else
-            {
-                yield return CreateSingleReport(start, end, 0L).report;
             }
         }
-
-        private (Report report, long roundingError) CreateSingleReport(DateTime start, DateTime end, long roundingError)
+        else
         {
-            var entries = _storage.ListTimeEntries(start, end);
+            yield return CreateSingleReport(start, end, 0L).report;
+        }
+    }
 
-            var previousEntry = default(TimeEntry);
-            var report = new Report
-            {
-                Start = start,
-                End = end
-            };
-            foreach (var entry in entries)
-            {
-                if (previousEntry != null && !previousEntry.Stopped &&
-                    (_tags.Count == 0 || previousEntry.Tags.Any(pt => _tags.Any(t => t.IsMatch(pt)))))
-                {
-                    report.Add(previousEntry.Tags, (long) (entry.Time - previousEntry.Time).TotalMilliseconds);
-                }
+    private (Report report, long roundingError) CreateSingleReport(DateTime start, DateTime end, long roundingError)
+    {
+        var entries = _storage.ListTimeEntries(start, end);
 
-                previousEntry = entry;
-            }
-
+        var previousEntry = default(TimeEntry);
+        var report = new Report
+        {
+            Start = start,
+            End = end
+        };
+        foreach (var entry in entries)
+        {
             if (previousEntry != null && !previousEntry.Stopped &&
                 (_tags.Count == 0 || previousEntry.Tags.Any(pt => _tags.Any(t => t.IsMatch(pt)))))
             {
-                var nextEntry = _storage.GetNextEntry(previousEntry);
-                var endTime = nextEntry?.Time ?? DateTime.Now;
-                var currentMs = (long) (endTime - previousEntry.Time).TotalMilliseconds;
-                report.Add(previousEntry.Tags, currentMs);
+                report.Add(previousEntry.Tags, (long) (entry.Time - previousEntry.Time).TotalMilliseconds);
             }
 
-            SortItems(report.Items);
-
-            roundingError = report.SetRoundedHours(roundingError, _rounding);
-            return (report, roundingError);
+            previousEntry = entry;
         }
 
-        private void SortItems(List<ReportItem> items)
+        if (previousEntry != null && !previousEntry.Stopped &&
+            (_tags.Count == 0 || previousEntry.Tags.Any(pt => _tags.Any(t => t.IsMatch(pt)))))
         {
-            items.Sort((a,b) => StringComparer.OrdinalIgnoreCase.Compare(a.Tag, b.Tag));
-            foreach (var i in items)
-                SortItems(i.Items);
+            var nextEntry = _storage.GetNextEntry(previousEntry);
+            var endTime = nextEntry?.Time ?? DateTime.Now;
+            var currentMs = (long) (endTime - previousEntry.Time).TotalMilliseconds;
+            report.Add(previousEntry.Tags, currentMs);
         }
+
+        SortItems(report.Items);
+
+        roundingError = report.SetRoundedHours(roundingError, _rounding);
+        return (report, roundingError);
+    }
+
+    private void SortItems(List<ReportItem> items)
+    {
+        items.Sort((a,b) => StringComparer.OrdinalIgnoreCase.Compare(a.Tag, b.Tag));
+        foreach (var i in items)
+            SortItems(i.Items);
     }
 }
