@@ -30,16 +30,27 @@ public class CsvSimpleReportFormatter : IReportFormatter
     private void GenerateRows(Report report, ReportItem item, List<string[]> result)
     {
         if (item.Items.Count == 0)
+        {
             result.Add(new[]
             {
                 report.Start.Date.ToString("yyyy-MM-dd"),
                 item.TagLine,
                 _timeFormatter.Format(item.HoursExcludingChildren)
             });
+        }
         else
         {
             foreach (var subItem in item.Items)
                 GenerateRows(report, subItem, result);
+            if (item.Milliseconds != item.MillisecondsExcludingChildren && item.MillisecondsExcludingChildren > 0)
+            {
+                result.Add(new[]
+                {
+                    report.Start.Date.ToString("yyyy-MM-dd"),
+                    item.TagLine,
+                    _timeFormatter.Format(item.HoursExcludingChildren)
+                });
+            }
         }
     }
 }
