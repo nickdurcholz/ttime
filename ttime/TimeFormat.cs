@@ -4,5 +4,6 @@ public enum TimeFormat
 {
     DecimalHours,
     HoursMinutes,
-    Combined
+    Combined,
+    TimeSpan
 }

@@ -3,7 +3,8 @@ namespace ttime;
 public enum ReportFormat
 {
     Text,
-    Csv,
+    CsvSimple,
+    CsvRollup,
     Xml,
     Json
 }

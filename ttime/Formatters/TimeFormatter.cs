@@ -15,6 +15,8 @@ public class TimeFormatter
     {
         if (_format == TimeFormat.DecimalHours)
             return hours.ToString("N");
+        if (_format == TimeFormat.TimeSpan)
+            return TimeSpan.FromHours((double) hours).ToString();
 
         var ts = TimeSpan.FromHours((double)hours);
         var h = (int)ts.TotalHours;

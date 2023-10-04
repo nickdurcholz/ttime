@@ -241,7 +241,7 @@ public class ReportCommand : Command
             roundingPrecision,
             daily,
             tags);
-        var formatter = FormatterFactory.GetReportFormatter(dataFormat, Configuration.TimeFormat);
+        var formatter = FormatterFactory.GetReportFormatter(dataFormat, timeFormat);
 
         var reports = calculator.CreateReport();
 
@@ -273,7 +273,8 @@ public class ReportCommand : Command
     {
         Out.WriteLine("usage: ttime report [<day-of-week> | lastWeek | yesterday | today |");
         Out.WriteLine("                    <date> | week | all | from=<date-time>");
-        Out.WriteLine("                    [to=<date-time>]] [format=text|csv|xml|json]");
+        Out.WriteLine("                    [to=<date-time>]]");
+        Out.WriteLine("                    [format=text|CsvSimple|CsvRollup|xml|json]");
         Out.WriteLine("                    [n=3] [daily=y|n] [out=<file>] [round=x] ");
         Out.WriteLine("                    [disp=DecimalHours|HoursMinutes] [tag]...");
         Out.WriteLine();

@@ -9,7 +9,8 @@ public static class FormatterFactory
         return fmt switch
         {
             ReportFormat.Text => new TextReportFormatter(new TimeFormatter(timeFormat)),
-            ReportFormat.Csv => new CsvReportFormatter(),
+            ReportFormat.CsvSimple => new CsvSimpleReportFormatter(new TimeFormatter(timeFormat)),
+            ReportFormat.CsvRollup => new CsvRollupReportFormatter(),
             ReportFormat.Xml => new XmlReportFormatter(),
             ReportFormat.Json => new JsonReportFormatter(),
             _ => throw new ArgumentOutOfRangeException(nameof(fmt), fmt, null)

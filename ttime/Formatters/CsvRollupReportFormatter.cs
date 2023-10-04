@@ -7,7 +7,7 @@ using Csv;
 
 namespace ttime.Formatters;
 
-public class CsvReportFormatter : IReportFormatter
+public class CsvRollupReportFormatter : IReportFormatter
 {
     public void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel)
     {
