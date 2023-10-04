@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using ttime.Formatters;
 
 namespace ttime;
 
@@ -11,7 +12,7 @@ public class ExportCommand : Command
     public override void Run(Span<string> args)
     {
         ReportingPeriod period = default;
-        OutputFormat format = default;
+        ExportFormat format = default;
         string outFile = null;
         DateTime fromDate = default;
         DateTime toDate = default;
@@ -163,7 +164,7 @@ public class ExportCommand : Command
         if (toDate == default)
             toDate = DateTime.Now;
 
-        var formatter = Formatter.Create(format, Configuration.TimeFormat);
+        var formatter = FormatterFactory.GetExportFormatter(format);
 
         var (start, end) = DateTimeUtility.ExpandPeriod(period, Configuration.StartOfWeek, fromDate, toDate);
         var entries = Storage.ListTimeEntries(start, end).ToList();

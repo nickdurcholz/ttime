@@ -1,8 +1,7 @@
 ﻿namespace ttime;
 
-public enum OutputFormat
+public enum ImportFormat
 {
-    Text,
     Csv,
     Xml,
     Json

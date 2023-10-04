@@ -5,7 +5,7 @@ using JsonReader = Newtonsoft.Json.JsonReader;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 using JsonWriter = Newtonsoft.Json.JsonWriter;
 
-namespace ttime;
+namespace ttime.Formatters;
 
 public class JsonObjectIdConverter : JsonConverter<ObjectId>
 {

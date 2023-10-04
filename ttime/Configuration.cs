@@ -17,8 +17,8 @@ public class Configuration
     private readonly Storage _storage;
     private readonly List<ConfigSetting> _settings;
     private ReportingPeriod _defaultReportingPeriod;
-    private OutputFormat _defaultReportFormat;
-    private OutputFormat _defaultExportFormat;
+    private ReportFormat _defaultReportFormat;
+    private ExportFormat _defaultExportFormat;
     private DayOfWeek _startOfWeek;
     private decimal _roundingPrecision;
     private int _hoursPerWeek;
@@ -39,8 +39,8 @@ public class Configuration
         _settings = storage.ListConfigSettings().ToList();
 
         Enum.TryParse(GetSetting(DefaultReportingPeriodKey, nameof(ReportingPeriod.Yesterday)), true, out _defaultReportingPeriod);
-        Enum.TryParse(GetSetting(DefaultReportFormatKey, nameof(OutputFormat.Text)), true, out _defaultReportFormat);
-        Enum.TryParse(GetSetting(DefaultExportFormatKey, nameof(OutputFormat.Csv)), true, out _defaultExportFormat);
+        Enum.TryParse(GetSetting(DefaultReportFormatKey, nameof(ReportFormat.Text)), true, out _defaultReportFormat);
+        Enum.TryParse(GetSetting(DefaultExportFormatKey, nameof(ExportFormat.Csv)), true, out _defaultExportFormat);
         Enum.TryParse(GetSetting(StartOfWeekKey, nameof(DayOfWeek.Monday)), true, out _startOfWeek);
         Enum.TryParse(GetSetting(TimeFormatKey, nameof(TimeFormat.DecimalHours)), true, out _timeFormat);
         decimal.TryParse(GetSetting(RoundingKey, "0"), out _roundingPrecision);
@@ -70,7 +70,7 @@ public class Configuration
         }
     }
 
-    public OutputFormat DefaultReportFormat
+    public ReportFormat DefaultReportFormat
     {
         get => _defaultReportFormat;
         set
@@ -80,7 +80,7 @@ public class Configuration
         }
     }
 
-    public OutputFormat DefaultExportFormat
+    public ExportFormat DefaultExportFormat
     {
         get => _defaultExportFormat;
         set

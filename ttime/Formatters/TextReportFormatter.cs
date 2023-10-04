@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace ttime;
+namespace ttime.Formatters;
 
-public class TextFormatter : Formatter
+public class TextReportFormatter : IReportFormatter
 {
     private readonly TimeFormatter _timeFormatter;
 
-    public TextFormatter(TimeFormatter timeFormatter)
+    public TextReportFormatter(TimeFormatter timeFormatter)
     {
         _timeFormatter = timeFormatter;
     }
 
-    public override void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel)
+    public void Write(IEnumerable<Report> reports, TextWriter @out, int? nestingLevel)
     {
-        foreach(var report in reports)
+        foreach (var report in reports)
             Write(report, @out, nestingLevel);
     }
 
@@ -34,7 +34,8 @@ public class TextFormatter : Formatter
             @out.Write(report.End.ToString("F"));
             @out.WriteLine(":");
 
-            List<(string name, decimal hours, int nesting)> lines = new List<(string name, decimal hours, int nesting)>();
+            List<(string name, decimal hours, int nesting)> lines =
+                new List<(string name, decimal hours, int nesting)>();
 
             if (maxNesting <= 0)
             {
@@ -69,7 +70,8 @@ public class TextFormatter : Formatter
         }
     }
 
-    private IEnumerable<(string name, decimal hours, int nesting)> GetHeirarchicalLines(ReportItem item, int? maxNesting, int nestingLevel = 0)
+    private IEnumerable<(string name, decimal hours, int nesting)> GetHeirarchicalLines(ReportItem item,
+        int? maxNesting, int nestingLevel = 0)
     {
         var names = new List<string> {item.Tag};
         var current = item;
@@ -92,7 +94,8 @@ public class TextFormatter : Formatter
         }
     }
 
-    private IEnumerable<(string name, decimal hours, int nesting)> EnumerateLeaves(List<ReportItem> children, int nestingLevel, List<string> names)
+    private IEnumerable<(string name, decimal hours, int nesting)> EnumerateLeaves(List<ReportItem> children,
+        int nestingLevel, List<string> names)
     {
         foreach (var c in children)
         {
@@ -106,37 +109,9 @@ public class TextFormatter : Formatter
                 foreach (var result in EnumerateLeaves(c.Items, nestingLevel, names))
                     yield return result;
             }
+
             names.RemoveAt(names.Count - 1);
         }
     }
 
-
-    public override void Write(IEnumerable<TimeEntry> entries, TextWriter @out)
-    {
-        foreach (var entry in entries)
-        {
-            @out.Write(entry.Time.ToString("s"));
-            @out.Write("  ");
-            if (entry.Stopped)
-            {
-                @out.Write("Stopped");
-            }
-            else
-            {
-                for (var i = 0; i < entry.Tags.Length; i++)
-                {
-                    @out.Write(entry.Tags[i]);
-                    if (i != entry.Tags.Length - 1)
-                        @out.Write(", ");
-                }
-            }
-
-            @out.WriteLine();
-        }
-    }
-
-    public override List<TimeEntry> DeserializeEntries(TextReader reader)
-    {
-        throw new NotImplementedException();
-    }
 }

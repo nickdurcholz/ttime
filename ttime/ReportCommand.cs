@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using ttime.Formatters;
 
 namespace ttime;
 
@@ -9,7 +10,7 @@ public class ReportCommand : Command
     public override void Run(Span<string> args)
     {
         ReportingPeriod period = default;
-        OutputFormat outputFormat = default;
+        ReportFormat dataFormat = default;
         string outFile = null;
         DateTime fromDate = default;
         DateTime toDate = default;
@@ -95,7 +96,7 @@ public class ReportCommand : Command
                     continue;
                 }
 
-                if (!Enum.TryParse(arg.Substring(7), true, out outputFormat))
+                if (!Enum.TryParse(arg.Substring(7), true, out dataFormat))
                 {
                     Error.WriteLine("Invalid format: " + arg);
                     valid = false;
@@ -227,7 +228,7 @@ public class ReportCommand : Command
         if (!periodFound)
             period = Configuration.DefaultReportingPeriod;
         if (!outputFormatFound)
-            outputFormat = Configuration.DefaultReportFormat;
+            dataFormat = Configuration.DefaultReportFormat;
         if (toDate == default)
             toDate = DateTime.Now;
 
@@ -240,7 +241,7 @@ public class ReportCommand : Command
             roundingPrecision,
             daily,
             tags);
-        var formatter = Formatter.Create(outputFormat, Configuration.TimeFormat);
+        var formatter = FormatterFactory.GetReportFormatter(dataFormat, Configuration.TimeFormat);
 
         var reports = calculator.CreateReport();
 

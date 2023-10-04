@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ttime;
+namespace ttime.Formatters;
 
 public class TimeFormatter
 {

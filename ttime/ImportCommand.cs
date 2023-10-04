@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ttime.Formatters;
 
 namespace ttime;
 
@@ -9,7 +10,7 @@ public class ImportCommand : Command
 {
     public override void Run(Span<string> args)
     {
-        OutputFormat format = default;
+        ImportFormat format = default;
         bool formatFound = false;
         string file = null;
         bool valid = true;
@@ -64,23 +65,16 @@ public class ImportCommand : Command
         {
             var extension = Path.GetExtension(file);
             if (".csv".EqualsOIC(extension))
-                format = OutputFormat.Csv;
+                format = ImportFormat.Csv;
             else if (".xml".EqualsOIC(extension))
-                format = OutputFormat.Xml;
+                format = ImportFormat.Xml;
             else if (".json".EqualsOIC(extension))
-                format = OutputFormat.Json;
+                format = ImportFormat.Json;
             else
-                format = Configuration.DefaultExportFormat;
+                format = ImportFormat.Csv;
         }
 
-        if (format == OutputFormat.Text)
-        {
-            Error.WriteLine("The text formatter cannot be used with the import command. " +
-                            "Please specify a different formatter with format=<xml|json|csv>.");
-            return;
-        }
-
-        var formatter = Formatter.Create(format, Configuration.TimeFormat);
+        var formatter = FormatterFactory.GetImportFormatter(format);
         List<TimeEntry> entries;
         var importReader = In;
         if (file != null)
