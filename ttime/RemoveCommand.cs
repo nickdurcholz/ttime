@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using LiteDB;
 
@@ -10,7 +11,7 @@ public class RemoveCommand : Command
     {
         int? offset = default;
         bool error = default;
-        string id = default;
+        List<string> ids = new();
 
         foreach (var arg in args)
         {
@@ -21,7 +22,7 @@ public class RemoveCommand : Command
                     Error.WriteLine($"Duplicate offset specified: {arg}");
                     error = true;
                 }
-                else if (id != null)
+                else if (ids.Count > 0)
                 {
                     Error.WriteLine($"You may not specify both an id and an offset");
                     error = true;
@@ -38,14 +39,9 @@ public class RemoveCommand : Command
                     Error.WriteLine($"You may not specify both an id and an offset");
                     error = true;
                 }
-                else if (id != null)
-                {
-                    Error.WriteLine($"Duplicate id specified: {arg}");
-                    error = true;
-                }
                 else
                 {
-                    id = arg;
+                    ids.Add(arg);
                 }
             }
             else
@@ -58,8 +54,11 @@ public class RemoveCommand : Command
         if (error)
             return;
 
-        var oid = offset.HasValue ? Storage.GetLastEntry(offset.Value).Id : new ObjectId(id);
-        Storage.DeleteEntry(oid);
+        foreach (var id in ids)
+        {
+            var oid = offset.HasValue ? Storage.GetLastEntry(offset.Value).Id : new ObjectId(id);
+            Storage.DeleteEntry(oid);
+        }
     }
 
     public override void PrintUsage()
