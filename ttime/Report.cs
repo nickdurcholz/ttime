@@ -111,6 +111,8 @@ public class TimeContainer
 
     private static long GetRoundedMilliseconds(long ms, long roundToNearestMs)
     {
+        if (roundToNearestMs < 1)
+            roundToNearestMs = 1;
         var floor = ms / roundToNearestMs * roundToNearestMs;
         var midpoint = roundToNearestMs / 2;
         if (ms - floor > midpoint)
