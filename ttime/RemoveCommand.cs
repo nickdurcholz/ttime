@@ -9,40 +9,18 @@ public class RemoveCommand : Command
 {
     public override void Run(Span<string> args)
     {
-        int? offset = default;
         bool error = default;
-        List<string> ids = new();
+        List<(bool isId, string value)> ids = new();
 
         foreach (var arg in args)
         {
             if (Regex.IsMatch(arg, @"^-\d+$"))
             {
-                if (offset.HasValue)
-                {
-                    Error.WriteLine($"Duplicate offset specified: {arg}");
-                    error = true;
-                }
-                else if (ids.Count > 0)
-                {
-                    Error.WriteLine($"You may not specify both an id and an offset");
-                    error = true;
-                }
-                else
-                {
-                    offset = int.Parse(((ReadOnlySpan<char>) arg).Slice(1));
-                }
+                ids.Add((false, arg.Substring(1)));
             }
             else if (Regex.IsMatch(arg, "^[0-9a-fA-F]{24}$"))
             {
-                if (offset.HasValue)
-                {
-                    Error.WriteLine($"You may not specify both an id and an offset");
-                    error = true;
-                }
-                else
-                {
-                    ids.Add(arg);
-                }
+                ids.Add((true, arg));
             }
             else
             {
@@ -56,7 +34,7 @@ public class RemoveCommand : Command
 
         foreach (var id in ids)
         {
-            var oid = offset.HasValue ? Storage.GetLastEntry(offset.Value).Id : new ObjectId(id);
+            var oid = id.isId ? new ObjectId(id.value) : Storage.GetLastEntry(int.Parse(id.value)).Id;
             Storage.DeleteEntry(oid);
         }
     }
@@ -67,7 +45,6 @@ public class RemoveCommand : Command
         Out.WriteLine();
         Out.WriteLine("    Delete an entry. Entries are specified as either an offset (e.g. -0 is the");
         Out.WriteLine("    last entry, -1 is the second-to-last, etc...) or an id.");
-
     }
 
     public override string Name => "rm";
