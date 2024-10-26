@@ -4,16 +4,16 @@ using System.IO;
 using System.Linq;
 using LiteDB;
 
-namespace ttime;
+namespace ttime.Backends.LiteDb;
 
 public class LiteDbStorage : IStorage, IDisposable
 {
     private const int CurrentDataVersion = 1;
 
     private readonly LiteDatabase _db;
-    private ILiteCollection<Alias> _aliasCollection;
-    private ILiteCollection<ConfigSetting> _configCollection;
-    private ILiteCollection<TimeEntry> _timeCollection;
+    private ILiteCollection<LiteDbAlias> _aliasCollection;
+    private ILiteCollection<LiteDbConfigSetting> _configCollection;
+    private ILiteCollection<LiteDbTimeEntry> _timeCollection;
 
     public LiteDbStorage(LiteDatabase db)
     {
@@ -37,24 +37,24 @@ public class LiteDbStorage : IStorage, IDisposable
         }
     }
 
-    private ILiteCollection<ConfigSetting> ConfigCollection
+    private ILiteCollection<LiteDbConfigSetting> ConfigCollection
     {
         get
         {
             if (_configCollection == null)
-                _configCollection = _db.GetCollection<ConfigSetting>("config");
+                _configCollection = _db.GetCollection<LiteDbConfigSetting>("config");
 
             return _configCollection;
         }
     }
 
-    private ILiteCollection<TimeEntry> TimeCollection
+    private ILiteCollection<LiteDbTimeEntry> TimeCollection
     {
         get
         {
             if (_timeCollection == null)
             {
-                _timeCollection = _db.GetCollection<TimeEntry>("time");
+                _timeCollection = _db.GetCollection<LiteDbTimeEntry>("time");
                 _timeCollection.EnsureIndex(e => e.Time);
             }
 
@@ -62,49 +62,51 @@ public class LiteDbStorage : IStorage, IDisposable
         }
     }
 
-    private ILiteCollection<Alias> AliasCollection => _aliasCollection ??= _db.GetCollection<Alias>("alias");
+    private ILiteCollection<LiteDbAlias> AliasCollection => _aliasCollection ??= _db.GetCollection<LiteDbAlias>("alias");
 
     public void Dispose() => _db?.Dispose();
 
-    public IEnumerable<ConfigSetting> ListConfigSettings() => ConfigCollection.FindAll();
+    public IEnumerable<ConfigSetting> ListConfigSettings() => ConfigCollection.FindAll().Select(s => s.Setting);
 
-    public void Save(ConfigSetting setting) => ConfigCollection.Upsert(setting);
+    public void Save(ConfigSetting setting) => ConfigCollection.Upsert(new LiteDbConfigSetting(setting));
 
-    public void Save(TimeEntry timeEntry) => TimeCollection.Upsert(timeEntry);
+    public void Save(TimeEntry timeEntry) => TimeCollection.Upsert(new LiteDbTimeEntry(timeEntry));
 
     public IEnumerable<TimeEntry> ListTimeEntries(DateTime start, DateTime end)
     {
         //start inclusive, end exclusive. This avoids an edge case when reporting when a task starts at exactly midnight.
-        var results = TimeCollection.Query()
-                                    .Where(e => start <= e.Time && e.Time < end)
-                                    .OrderBy(e => e.Time)
-                                    .ToEnumerable();
-        return results;
+        return TimeCollection.Query()
+                             .Where(e => start <= e.Time && e.Time < end)
+                             .OrderBy(e => e.Time)
+                             .ToEnumerable()
+                             .Select(e => e.Entry);
     }
 
     public TimeEntry GetNextEntry(TimeEntry entry)
     {
         var entryTime = entry.Time;
-        return TimeCollection.FindOne(e => e.Time > entryTime);
+        return TimeCollection.FindOne(e => e.Time > entryTime)?.Entry;
     }
 
-    public void DeleteEntry(ObjectId entryId) => TimeCollection.Delete(entryId);
+    public void DeleteEntry(string entryId) => TimeCollection.Delete(new ObjectId(entryId));
 
-    public void Save(IEnumerable<TimeEntry> entries) => TimeCollection.Upsert(entries);
+    public void Save(IEnumerable<TimeEntry> entries) =>
+        TimeCollection.Upsert(entries.Select(e => new LiteDbTimeEntry(e)));
 
-    public IEnumerable<Alias> ListAliases() => AliasCollection.FindAll();
+    public IEnumerable<Alias> ListAliases() => AliasCollection.FindAll().Select(x => x.Alias);
 
-    public void Save(Alias alias) => AliasCollection.Upsert(alias);
+    public void Save(Alias alias) => AliasCollection.Upsert(new LiteDbAlias(alias));
 
-    public void Delete(Alias alias) => AliasCollection.Delete(alias.Id);
+    public void Delete(Alias alias) => AliasCollection.Delete(new ObjectId(alias.Id));
 
-    public TimeEntry this[string id] => TimeCollection.FindById(new ObjectId(id));
+    public TimeEntry this[string id] => TimeCollection.FindById(new ObjectId(id)).Entry;
 
     public TimeEntry GetLastEntry(int offset)
     {
         return TimeCollection
               .Find(Query.All(nameof(TimeEntry.Time), Query.Descending), offset, 1)
-              .SingleOrDefault();
+              .SingleOrDefault()
+             ?.Entry;
     }
 
     public static string GetDbPath()
@@ -148,9 +150,9 @@ public class LiteDbStorage : IStorage, IDisposable
 
     public void Import(LiteDatabase originalDb)
     {
-        ConfigCollection.InsertBulk(originalDb.GetCollection<ConfigSetting>("config").FindAll());
-        AliasCollection.InsertBulk(originalDb.GetCollection<Alias>("alias").FindAll());
-        TimeCollection.InsertBulk(originalDb.GetCollection<TimeEntry>("time").FindAll());
+        ConfigCollection.InsertBulk(originalDb.GetCollection<LiteDbConfigSetting>("config").FindAll());
+        AliasCollection.InsertBulk(originalDb.GetCollection<LiteDbAlias>("alias").FindAll());
+        TimeCollection.InsertBulk(originalDb.GetCollection<LiteDbTimeEntry>("time").FindAll());
         _db.GetCollection<DataFormatVersion>("data_version")
            .Insert(new DataFormatVersion { Version = CurrentDataVersion });
     }

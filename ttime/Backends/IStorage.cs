@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using LiteDB;
 
 namespace ttime;
 
@@ -13,7 +12,7 @@ public interface IStorage
     void Save(Alias alias);
     IEnumerable<TimeEntry> ListTimeEntries(DateTime start, DateTime end);
     TimeEntry GetNextEntry(TimeEntry entry);
-    void DeleteEntry(ObjectId entryId);
+    void DeleteEntry(string entryId);
     IEnumerable<Alias> ListAliases();
     void Delete(Alias alias);
     TimeEntry this[string id] { get; }

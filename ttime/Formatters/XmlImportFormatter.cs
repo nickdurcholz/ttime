@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
-using LiteDB;
 
 namespace ttime.Formatters;
 
@@ -24,7 +23,7 @@ public class XmlImportFormatter : IImportFormatter
 
             result.Add(new TimeEntry
             {
-                Id = string.IsNullOrEmpty(id) ? null : new ObjectId(id),
+                Id = string.IsNullOrEmpty(id) ? null : id,
                 Time = DateTime.Parse(time),
                 Tags = tags.ToArray(),
                 Stopped = !string.IsNullOrEmpty(stopped) && bool.Parse(stopped)

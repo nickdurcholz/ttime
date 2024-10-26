@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using LiteDB;
 
 namespace ttime;
 
@@ -34,7 +33,7 @@ public class RemoveCommand : Command
 
         foreach (var id in ids)
         {
-            var oid = id.isId ? new ObjectId(id.value) : Storage.GetLastEntry(int.Parse(id.value)).Id;
+            var oid = id.isId ? id.value : Storage.GetLastEntry(int.Parse(id.value)).Id;
             Storage.DeleteEntry(oid);
         }
     }

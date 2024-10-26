@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
-using LiteDB;
-using Newtonsoft.Json;
-using ttime.Formatters;
 
 namespace ttime;
 
 [DebuggerDisplay("{DebuggerDisplay}")]
 public class TimeEntry
 {
-    [JsonConverter(typeof(JsonObjectIdConverter))]
-    public ObjectId Id { get; set; }
+    public string Id { get; set; }
 
     public DateTime Time { get; set; }
     public bool Stopped { get; set; }

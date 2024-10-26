@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Csv;
-using LiteDB;
 
 namespace ttime.Formatters;
 
@@ -47,7 +46,7 @@ public class CsvImportFormatter : IImportFormatter
 
             result.Add(new TimeEntry
             {
-                Id = string.IsNullOrEmpty(id) ? null : new ObjectId(id),
+                Id = string.IsNullOrEmpty(id) ? null : id,
                 Time = time,
                 Tags = tags.ToArray(),
                 Stopped = !string.IsNullOrEmpty(stopped) && bool.Parse(stopped)
