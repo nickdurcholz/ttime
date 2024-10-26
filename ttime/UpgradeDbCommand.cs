@@ -25,7 +25,7 @@ public class UpgradeDbCommand : Command
             Filename = upgradeDbPath,
         });
 
-        var storage = new Storage(newdb);
+        var storage = new LiteDbStorage(newdb);
         storage.Import(originalDb);
         originalDb.Dispose();
         newdb.Dispose();

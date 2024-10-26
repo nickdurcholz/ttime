@@ -7,7 +7,7 @@ namespace ttime;
 
 public class ReportCalculator
 {
-    private readonly Storage _storage;
+    private readonly IStorage _storage;
     private readonly ReportingPeriod _period;
     private readonly DateTime _fromDate;
     private readonly DateTime _toDate;
@@ -17,7 +17,7 @@ public class ReportCalculator
     private readonly List<Regex> _tags;
 
     public ReportCalculator(
-        Storage storage,
+        IStorage storage,
         ReportingPeriod period,
         DateTime fromDate,
         DateTime toDate,

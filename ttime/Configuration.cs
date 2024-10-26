@@ -14,7 +14,7 @@ public class Configuration
     private const string HoursPerWeekKey = "hoursPerWeek";
     private const string TimeFormatKey = "timeFormat";
 
-    private readonly Storage _storage;
+    private readonly IStorage _storage;
     private readonly List<ConfigSetting> _settings;
     private ReportingPeriod _defaultReportingPeriod;
     private ReportFormat _defaultReportFormat;
@@ -24,7 +24,7 @@ public class Configuration
     private int _hoursPerWeek;
     private TimeFormat _timeFormat;
 
-    public Configuration(Storage storage)
+    public Configuration(IStorage storage)
     {
         _storage = storage;
 

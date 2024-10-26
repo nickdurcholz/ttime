@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using LiteDB;
+using CommandDotNet;
 
 namespace ttime;
 
 class Program
 {
-    private static LiteDatabase _db;
-
     public static readonly IReadOnlyList<Command> AvailableCommands = new List<Command>
     {
         new HelpCommand(),
@@ -26,35 +23,33 @@ class Program
         new EditCommand(),
     };
 
-    static void Main(string[] args)
-    {
-        var requestedCommandName = args.Length > 0 ? args[0] : "help";
-        var command = GetCommand(requestedCommandName);
-        if (command is UpgradeDbCommand upgradeCommand)
-        {
-            upgradeCommand.DbPath = GetDbPath();
-            command.Run(new Span<string>());
-            return;
-        }
+    [Subcommand] public HelpCommand HelpCommand { get; set; }
+    [Subcommand] public StartCommand StartCommand { get; set; }
+    [Subcommand] public StopCommand StopCommand { get; set; }
+    [Subcommand] public ReportCommand ReportCommand { get; set; }
+    [Subcommand] public ConfigCommand ConfigCommand { get; set; }
+    [Subcommand] public ImportCommand ImportCommand { get; set; }
+    [Subcommand] public ExportCommand ExportCommand { get; set; }
+    [Subcommand] public AliasCommand AliasCommand { get; set; }
+    [Subcommand] public RemoveCommand RemoveCommand { get; set; }
+    [Subcommand] public StopTimeCommand StopTimeCommand { get; set; }
+    [Subcommand] public UpgradeDbCommand UpgradeDbCommand { get; set; }
+    [Subcommand] public EditCommand EditCommand { get; set; }
 
-        var dbPath = GetDbPath();
+    static int Main(string[] args)
+    {
         try
         {
-            _db = new LiteDatabase(new ConnectionString
+            var requestedCommandName = args.Length > 0 ? args[0] : "help";
+            var command = GetCommand(requestedCommandName);
+            if (command is UpgradeDbCommand upgradeCommand)
             {
-                Filename = dbPath,
-                Upgrade = false,
-            });
-        }
-        catch (LiteException ex) when (ex.ErrorCode == 103)
-        {
-            Console.Error.WriteLine($"Data file is out-of-date. Please run '{new UpgradeDbCommand().Name}' to upgrade data file to the current version.");
-            return;
-        }
+                upgradeCommand.DbPath = LiteDbStorage.GetDbPath();
+                command.Run(new Span<string>());
+                return 0;
+            }
 
-        using (_db)
-        {
-            var storage = new Storage(_db);
+            using var storage = new LiteDbStorage();
             var configuration = new Configuration(storage);
             foreach (var c in AvailableCommands)
             {
@@ -91,42 +86,17 @@ class Program
             }
 
             command.Run(remainingArgs);
+            return 0;
+        }
+        catch (CommandError ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+            return 1;
         }
     }
 
     public static Command GetCommand(string action)
     {
         return AvailableCommands.FirstOrDefault(c => action.EqualsOIC(c.Name));
-    }
-
-    private static string GetDbPath()
-    {
-        var dbPath = Environment.GetEnvironmentVariable("TTIME_DATA");
-        string dbFolder;
-        if (string.IsNullOrEmpty(dbPath))
-        {
-            if (Environment.OSVersion.Platform == PlatformID.Unix ||
-                Environment.OSVersion.Platform == PlatformID.MacOSX)
-            {
-                dbFolder = Path.Combine(Environment.GetEnvironmentVariable("HOME"), ".ttime");
-            }
-            else
-            {
-                dbFolder = Environment.GetFolderPath(
-                    Environment.SpecialFolder.ApplicationData,
-                    Environment.SpecialFolderOption.Create);
-                dbFolder = Path.Combine(dbFolder, "ttime");
-            }
-
-            dbPath = Path.Combine(dbFolder, "data.litedb");
-        }
-        else
-        {
-            dbFolder = Path.GetDirectoryName(dbPath);
-        }
-
-        if (!Directory.Exists(dbFolder))
-            Directory.CreateDirectory(dbFolder);
-        return dbPath;
     }
 }

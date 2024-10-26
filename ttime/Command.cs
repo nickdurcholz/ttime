@@ -13,7 +13,7 @@ public abstract class Command
     public abstract string Name { get; }
 
     public abstract string Description { get; }
-    public Storage Storage { get; set; }
+    public IStorage Storage { get; set; }
     public Configuration Configuration { get; set; }
     public TextWriter Out { get; set; }
     public TextWriter Error { get; set; }
