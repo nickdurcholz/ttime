@@ -89,7 +89,7 @@ class Program
             command.Run(remainingArgs);
             return 0;
         }
-        catch (CommandError ex)
+        catch (TTimeError ex)
         {
             Console.Error.WriteLine(ex.Message);
             return 1;

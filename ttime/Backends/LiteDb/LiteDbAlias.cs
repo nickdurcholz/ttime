@@ -3,27 +3,32 @@ using LiteDB;
 
 namespace ttime.Backends.LiteDb;
 
-public class LiteDbAlias(Alias alias)
+public class LiteDbAlias
 {
+    private Alias _alias;
     public LiteDbAlias() : this(new Alias()) { }
-
-    public ObjectId Id
+    public LiteDbAlias(Alias alias)
     {
-        get => string.IsNullOrEmpty(alias.Id) ? null : new(alias.Id);
-        set => alias.Id = value.ToString();
+        _alias = alias;
     }
+
+    public ObjectId Id { get; set; }
 
     public string Name
     {
-        get => alias.Name;
-        set => alias.Name = value;
+        get => _alias.Name;
+        set => _alias.Name = value;
     }
 
     public List<string> Args
     {
-        get => alias.Args;
-        set => alias.Args = value;
+        get => _alias.Args;
+        set => _alias.Args = value;
     }
 
-    public Alias Alias => alias;
+    public Alias Alias
+    {
+        get => _alias;
+        set => _alias = value;
+    }
 }

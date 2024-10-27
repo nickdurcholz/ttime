@@ -3,33 +3,38 @@ using LiteDB;
 
 namespace ttime.Backends.LiteDb;
 
-public class LiteDbTimeEntry(TimeEntry timeEntry)
+public class LiteDbTimeEntry
 {
-    public LiteDbTimeEntry() : this(new TimeEntry()) { }
-
-    public ObjectId Id
+    private TimeEntry _timeEntry;
+    public LiteDbTimeEntry() : this(new ttime.TimeEntry()) { }
+    public LiteDbTimeEntry(ttime.TimeEntry timeEntry)
     {
-        get => string.IsNullOrEmpty(timeEntry.Id) ? null : new ObjectId(timeEntry.Id);
-        set => timeEntry.Id = value.ToString();
+        _timeEntry = timeEntry;
     }
+
+    public ObjectId Id { get; set; }
 
     public DateTime Time
     {
-        get => timeEntry.Time;
-        set => timeEntry.Time = value;
+        get => _timeEntry.Time;
+        set => _timeEntry.Time = value;
     }
 
     public bool Stopped
     {
-        get => timeEntry.Stopped;
-        set => timeEntry.Stopped = value;
+        get => _timeEntry.Stopped;
+        set => _timeEntry.Stopped = value;
     }
 
     public string[] Tags
     {
-        get => timeEntry.Tags;
-        set => timeEntry.Tags = value;
+        get => _timeEntry.Tags;
+        set => _timeEntry.Tags = value;
     }
 
-    public TimeEntry Entry => timeEntry;
+    public ttime.TimeEntry Entry
+    {
+        get => _timeEntry;
+        set => _timeEntry = value;
+    }
 }

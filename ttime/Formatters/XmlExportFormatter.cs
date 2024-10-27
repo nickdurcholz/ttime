@@ -14,7 +14,6 @@ public class XmlExportFormatter : IExportFormatter
         {
             var entryElement = new XElement(
                 "entry",
-                new XAttribute("id", entry.Id),
                 new XAttribute("time", entry.Time.ToString("s")),
                 new XAttribute("stopped", entry.Stopped ? "true" : "false"));
             foreach (var tag in entry.Tags)

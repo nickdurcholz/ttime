@@ -10,7 +10,7 @@ public class EditCommand : Command
     {
         DateTime? time = default;
         int? offset = default;
-        string id = default;
+        DateTime? id = default;
         bool error = false;
 
         List<string> tags = new List<string>();
@@ -19,8 +19,16 @@ public class EditCommand : Command
         {
             if (DateTime.TryParse(arg, out var t) || DateTimeUtility.TryParseDateOffset(arg, DateTime.Now, out t))
             {
-
-                if (time.HasValue)
+                if (!id.HasValue)
+                {
+                    if (offset.HasValue)
+                    {
+                        Error.WriteLine($"You may not specify both a timestamp and an offset");
+                        error = true;
+                    }
+                    id = t;
+                }
+                else if (time.HasValue)
                 {
                     Error.WriteLine($"Duplicate time specified: {arg}");
                     error = true;
@@ -37,29 +45,12 @@ public class EditCommand : Command
                 }
                 else if (id != null)
                 {
-                    Error.WriteLine($"You may not specify both an id and an offset");
+                    Error.WriteLine($"You may not specify both a timestamp and an offset");
                     error = true;
                 }
                 else
                 {
                     offset = int.Parse(((ReadOnlySpan<char>) arg).Slice(1));
-                }
-            }
-            else if (Regex.IsMatch(arg, "^[0-9a-fA-F]{24}$"))
-            {
-                if (offset.HasValue)
-                {
-                    Error.WriteLine($"You may not specify both an id and an offset");
-                    error = true;
-                }
-                else if (id != null)
-                {
-                    Error.WriteLine($"Duplicate id specified: {arg}");
-                    error = true;
-                }
-                else
-                {
-                    id = arg;
                 }
             }
             else
@@ -68,14 +59,14 @@ public class EditCommand : Command
 
         if (id == null && offset == null)
         {
-            Error.WriteLine("You must provide either an offset or an id");
+            Error.WriteLine("You must provide either an offset or an timestamp");
             error = true;
         }
 
         if (error)
             return;
 
-        var entry = id == null ? Storage.GetLastEntry(offset.Value) : Storage[id];
+        var entry = id == null ? Storage.GetLastEntry(offset.Value) : Storage[id.Value];
         if (time.HasValue)
             entry.Time = time.Value;
         if (tags.Count > 0)
@@ -86,7 +77,7 @@ public class EditCommand : Command
 
     public override void PrintUsage()
     {
-        Out.WriteLine("usage: ttime edit [-<offset>|<id>] [<date-time>] [<tag>...]");
+        Out.WriteLine("usage: ttime edit -<offset>|<timestamp> [<date-time>] [<tag>...]");
         Out.WriteLine();
         Out.WriteLine("    Update an entry with a new time and/or tags. Entries may be specified by id");
         Out.WriteLine("    and/or an offset from the last one entered.");

@@ -2,27 +2,32 @@ using LiteDB;
 
 namespace ttime.Backends.LiteDb;
 
-public class LiteDbConfigSetting(ConfigSetting setting)
+public class LiteDbConfigSetting
 {
+    private ConfigSetting _setting;
     public LiteDbConfigSetting() : this(new ConfigSetting()) { }
-
-    public ObjectId Id
+    public LiteDbConfigSetting(ConfigSetting setting)
     {
-        get => string.IsNullOrEmpty(setting.Id) ? null : new(setting.Id);
-        set => setting.Id = value.ToString();
+        _setting = setting;
     }
+
+    public ObjectId Id { get; set; }
 
     public string Key
     {
-        get => setting.Key;
-        set => setting.Key = value;
+        get => _setting.Key;
+        set => _setting.Key = value;
     }
 
     public string Value
     {
-        get => setting.Value;
-        set => setting.Value = value;
+        get => _setting.Value;
+        set => _setting.Value = value;
     }
 
-    public ConfigSetting Setting => setting;
+    public ConfigSetting Setting
+    {
+        get => _setting;
+        set => _setting = value;
+    }
 }

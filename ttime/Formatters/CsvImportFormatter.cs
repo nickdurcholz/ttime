@@ -10,9 +10,8 @@ public class CsvImportFormatter : IImportFormatter
     public List<TimeEntry> DeserializeEntries(TextReader reader)
     {
         var csvOptions = new CsvOptions { HeaderMode = HeaderMode.HeaderAbsent, TrimData = true };
-        const int idIndex = 0;
-        const int timeIndex = 1;
-        const int stoppedIndex = 2;
+        const int timeIndex = 0;
+        const int stoppedIndex = 1;
         int lineNumber = 0;
         List<TimeEntry> result = new List<TimeEntry>();
         while (reader.Peek() == '#')
@@ -21,10 +20,9 @@ public class CsvImportFormatter : IImportFormatter
         {
             lineNumber++;
 
-            if (lineNumber == 1 && line[idIndex].EqualsOIC("id") && line[timeIndex].EqualsOIC("time"))
+            if (lineNumber == 1 && line[timeIndex].EqualsOIC("time"))
                 continue; // skip header line if present
 
-            var id = line[idIndex];
             var timeString = line[timeIndex];
             DateTime time;
             try
@@ -38,7 +36,7 @@ public class CsvImportFormatter : IImportFormatter
 
             var stopped = line[stoppedIndex];
             var tags = new List<string>();
-            for (int i = 3; i < line.ColumnCount; i++)
+            for (int i = 2; i < line.ColumnCount; i++)
             {
                 if (!string.IsNullOrEmpty(line[i]))
                     tags.Add(line[i]);
@@ -46,7 +44,6 @@ public class CsvImportFormatter : IImportFormatter
 
             result.Add(new TimeEntry
             {
-                Id = string.IsNullOrEmpty(id) ? null : id,
                 Time = time,
                 Tags = tags.ToArray(),
                 Stopped = !string.IsNullOrEmpty(stopped) && bool.Parse(stopped)

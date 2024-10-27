@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace ttime;
@@ -9,17 +10,17 @@ public class RemoveCommand : Command
     public override void Run(Span<string> args)
     {
         bool error = default;
-        List<(bool isId, string value)> ids = new();
+        List<(int? offset, DateTime timestamp)> ids = new();
 
         foreach (var arg in args)
         {
             if (Regex.IsMatch(arg, @"^-\d+$"))
             {
-                ids.Add((false, arg.Substring(1)));
+                ids.Add((int.Parse(arg.Substring(1)), default));
             }
-            else if (Regex.IsMatch(arg, "^[0-9a-fA-F]{24}$"))
+            else if (DateTime.TryParse(arg, out var dt))
             {
-                ids.Add((true, arg));
+                ids.Add((null, dt));
             }
             else
             {
@@ -31,16 +32,14 @@ public class RemoveCommand : Command
         if (error)
             return;
 
-        foreach (var id in ids)
-        {
-            var oid = id.isId ? id.value : Storage.GetLastEntry(int.Parse(id.value)).Id;
-            Storage.DeleteEntry(oid);
-        }
+        var times = ids.Select(id => id.offset.HasValue ? Storage.GetLastEntry(id.offset.Value).Time : id.timestamp)
+                       .ToList();
+        Storage.DeleteEntries(times);
     }
 
     public override void PrintUsage()
     {
-        Out.WriteLine("ttime rm [-<offset>|<id>]");
+        Out.WriteLine("ttime rm -<offset>|<id> ...");
         Out.WriteLine();
         Out.WriteLine("    Delete an entry. Entries are specified as either an offset (e.g. -0 is the");
         Out.WriteLine("    last entry, -1 is the second-to-last, etc...) or an id.");

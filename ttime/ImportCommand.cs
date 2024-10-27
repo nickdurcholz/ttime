@@ -93,10 +93,7 @@ public class ImportCommand : Command
             }
         }
 
-        foreach (var entry in entries.Where(e => e.Id != null && e.Time == default))
-            Storage.DeleteEntry(entry.Id);
-
-        Storage.Save(entries.Where(e => e.Id == null || e.Time != default));
+        Storage.Save(entries);
     }
 
     public override void PrintUsage()

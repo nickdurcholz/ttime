@@ -32,8 +32,8 @@ public class LiteDbStorage : IStorage, IDisposable
         }
         catch (LiteException ex) when (ex.ErrorCode == 103)
         {
-            throw new CommandError($"Data file is out-of-date. Please run '{new UpgradeDbCommand().Name}' to " +
-                                   $"upgrade data file to the current version.");
+            throw new TTimeError($"Data file is out-of-date. Please run '{new UpgradeDbCommand().Name}' to " +
+                                 $"upgrade data file to the current version.");
         }
     }
 
@@ -43,6 +43,7 @@ public class LiteDbStorage : IStorage, IDisposable
         {
             if (_configCollection == null)
                 _configCollection = _db.GetCollection<LiteDbConfigSetting>("config");
+            _configCollection.EnsureIndex(e => e.Key);
 
             return _configCollection;
         }
@@ -62,19 +63,35 @@ public class LiteDbStorage : IStorage, IDisposable
         }
     }
 
-    private ILiteCollection<LiteDbAlias> AliasCollection => _aliasCollection ??= _db.GetCollection<LiteDbAlias>("alias");
+    private ILiteCollection<LiteDbAlias> AliasCollection
+    {
+        get
+        {
+            if (_aliasCollection == null)
+            {
+                _aliasCollection = _db.GetCollection<LiteDbAlias>("alias");
+                _aliasCollection.EnsureIndex(e => e.Name);
+            }
+
+            return _aliasCollection;
+        }
+    }
 
     public void Dispose() => _db?.Dispose();
 
     public IEnumerable<ConfigSetting> ListConfigSettings() => ConfigCollection.FindAll().Select(s => s.Setting);
 
-    public void Save(ConfigSetting setting) => ConfigCollection.Upsert(new LiteDbConfigSetting(setting));
-
-    public void Save(TimeEntry timeEntry) => TimeCollection.Upsert(new LiteDbTimeEntry(timeEntry));
-
-    public IEnumerable<TimeEntry> ListTimeEntries(DateTime start, DateTime end)
+    public void Save(ConfigSetting setting)
     {
-        //start inclusive, end exclusive. This avoids an edge case when reporting when a task starts at exactly midnight.
+        var c = ConfigCollection.FindOne(s => s.Key == setting.Key) ?? new LiteDbConfigSetting(setting);
+        c.Setting = setting;
+        ConfigCollection.Upsert(c);
+    }
+
+    public void Save(ttime.TimeEntry timeEntry) => TimeCollection.Upsert(new LiteDbTimeEntry(timeEntry));
+
+    public IEnumerable<ttime.TimeEntry> ListTimeEntries(DateTime start, DateTime end)
+    {
         return TimeCollection.Query()
                              .Where(e => start <= e.Time && e.Time < end)
                              .OrderBy(e => e.Time)
@@ -82,29 +99,72 @@ public class LiteDbStorage : IStorage, IDisposable
                              .Select(e => e.Entry);
     }
 
-    public TimeEntry GetNextEntry(TimeEntry entry)
+    public ttime.TimeEntry GetNextEntry(ttime.TimeEntry entry)
     {
         var entryTime = entry.Time;
         return TimeCollection.FindOne(e => e.Time > entryTime)?.Entry;
     }
 
-    public void DeleteEntry(string entryId) => TimeCollection.Delete(new ObjectId(entryId));
+    public void DeleteEntries(IList<DateTime> timestamp)
+    {
+        TimeCollection.DeleteMany(Query.Or(
+            timestamp.Select(ts => Query.EQ(nameof(LiteDbTimeEntry.Time), ts)).ToArray()
+        ));
+    }
 
-    public void Save(IEnumerable<TimeEntry> entries) =>
-        TimeCollection.Upsert(entries.Select(e => new LiteDbTimeEntry(e)));
+    public void Save(IEnumerable<ttime.TimeEntry> entries)
+    {
+        var orderedEntries = entries.OrderBy(e => e.Time).ToList();
+        if (orderedEntries.Count == 0)
+            return;
+        var minTime = orderedEntries.First().Time;
+        var maxTime = orderedEntries.Last().Time;
+        var existingEntries = TimeCollection.Query()
+                                            .Where(e => e.Time >= minTime && e.Time <= maxTime)
+                                            .OrderBy(e => e.Time)
+                                            .ToList();
+        var toSave = new List<LiteDbTimeEntry>();
+        var i = 0;
+        foreach (var entry in orderedEntries)
+        {
+            bool add = true;
+            while (i < existingEntries.Count)
+            {
+                var existing = existingEntries[i];
+                if (existing.Time > entry.Time)
+                    break;
+                i++;
+                if (entry.Time == existing.Time)
+                {
+                    existing.Entry = entry;
+                    toSave.Add(existing);
+                    add = false;
+                    break;
+                }
+            }
+            if (add)
+                toSave.Add(new LiteDbTimeEntry(entry));
+        }
+        TimeCollection.Upsert(toSave);
+    }
 
     public IEnumerable<Alias> ListAliases() => AliasCollection.FindAll().Select(x => x.Alias);
 
-    public void Save(Alias alias) => AliasCollection.Upsert(new LiteDbAlias(alias));
+    public void Save(Alias alias)
+    {
+        var a = AliasCollection.FindOne(a => a.Name == alias.Name) ?? new LiteDbAlias(alias);
+        a.Alias = alias;
+        AliasCollection.Upsert(a);
+    }
 
-    public void Delete(Alias alias) => AliasCollection.Delete(new ObjectId(alias.Id));
+    public void Delete(Alias alias) => AliasCollection.DeleteMany(a => a.Name == alias.Name);
 
-    public TimeEntry this[string id] => TimeCollection.FindById(new ObjectId(id)).Entry;
+    public TimeEntry this[DateTime timestamp] => TimeCollection.FindOne(e => e.Time == timestamp)?.Entry;
 
-    public TimeEntry GetLastEntry(int offset)
+    public ttime.TimeEntry GetLastEntry(int offset)
     {
         return TimeCollection
-              .Find(Query.All(nameof(TimeEntry.Time), Query.Descending), offset, 1)
+              .Find(Query.All(nameof(ttime.TimeEntry.Time), Query.Descending), offset, 1)
               .SingleOrDefault()
              ?.Entry;
     }
@@ -118,13 +178,13 @@ public class LiteDbStorage : IStorage, IDisposable
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 var homeDir = Environment.GetEnvironmentVariable("HOME") ??
-                              throw new CommandError("HOME environment variable is not set.");
+                              throw new TTimeError("HOME environment variable is not set.");
                 dbFolder = Path.Combine(homeDir, ".config", ".ttime");
             }
             else if (Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
                 var homeDir = Environment.GetEnvironmentVariable("HOME") ??
-                              throw new CommandError("HOME environment variable is not set.");
+                              throw new TTimeError("HOME environment variable is not set.");
                 dbFolder = Path.Combine(homeDir, "Library", "Application Support", "ttime");
             }
             else
@@ -140,7 +200,7 @@ public class LiteDbStorage : IStorage, IDisposable
         else
         {
             dbFolder = Path.GetDirectoryName(dbPath) ??
-                       throw new CommandError($"Invalid TTIME_DATA environment variable: {dbPath}");
+                       throw new TTimeError($"Invalid TTIME_DATA environment variable: {dbPath}");
         }
 
         if (!Directory.Exists(dbFolder))

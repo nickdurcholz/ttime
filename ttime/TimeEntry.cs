@@ -6,8 +6,6 @@ namespace ttime;
 [DebuggerDisplay("{DebuggerDisplay}")]
 public class TimeEntry
 {
-    public string Id { get; set; }
-
     public DateTime Time { get; set; }
     public bool Stopped { get; set; }
     public string[] Tags { get; set; }
