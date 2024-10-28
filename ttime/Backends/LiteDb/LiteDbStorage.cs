@@ -179,7 +179,7 @@ public class LiteDbStorage : IStorage, IDisposable
             {
                 var homeDir = Environment.GetEnvironmentVariable("HOME") ??
                               throw new TTimeError("HOME environment variable is not set.");
-                dbFolder = Path.Combine(homeDir, ".config", ".ttime");
+                dbFolder = Path.Combine(homeDir, ".config", "ttime");
             }
             else if (Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
