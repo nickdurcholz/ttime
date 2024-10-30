@@ -107,9 +107,17 @@ public class LiteDbStorage : IStorage, IDisposable
 
     public void DeleteEntries(IList<DateTime> timestamp)
     {
-        TimeCollection.DeleteMany(Query.Or(
-            timestamp.Select(ts => Query.EQ(nameof(LiteDbTimeEntry.Time), ts)).ToArray()
-        ));
+        BsonExpression query;
+        if (timestamp.Count == 0) return;
+
+        if (timestamp.Count == 1)
+            query = Query.EQ(nameof(LiteDbTimeEntry.Time), timestamp[0]);
+        else
+            query = Query.Or(
+                timestamp.Select(ts => Query.EQ(nameof(LiteDbTimeEntry.Time), ts)).ToArray()
+            );
+
+        TimeCollection.DeleteMany(query);
     }
 
     public void Save(IEnumerable<ttime.TimeEntry> entries)

@@ -42,7 +42,7 @@ public class RemoveCommand : Command
         Out.WriteLine("ttime rm -<offset>|<id> ...");
         Out.WriteLine();
         Out.WriteLine("    Delete an entry. Entries are specified as either an offset (e.g. -0 is the");
-        Out.WriteLine("    last entry, -1 is the second-to-last, etc...) or an id.");
+        Out.WriteLine("    last entry, -1 is the second-to-last, etc...) or a timestamp.");
     }
 
     public override string Name => "rm";
