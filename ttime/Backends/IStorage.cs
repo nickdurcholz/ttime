@@ -7,7 +7,7 @@ public interface IStorage
 {
     IEnumerable<ConfigSetting> ListConfigSettings();
     void Save(ConfigSetting setting);
-    void Save(TimeEntry timeEntry);
+    void Save(TimeEntry timeEntry, DateTime? newTime = null);
     void Save(IEnumerable<TimeEntry> entries);
     void Save(Alias alias);
     /// <summary>

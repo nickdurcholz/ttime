@@ -67,12 +67,12 @@ public class EditCommand : Command
             return;
 
         var entry = id == null ? Storage.GetLastEntry(offset.Value) : Storage[id.Value];
-        if (time.HasValue)
-            entry.Time = time.Value;
+        if (entry == null)
+            throw new TTimeError("The indicated entry was not found");
         if (tags.Count > 0)
             entry.Tags = tags.ToArray();
 
-        Storage.Save(entry);
+        Storage.Save(entry, time);
     }
 
     public override void PrintUsage()

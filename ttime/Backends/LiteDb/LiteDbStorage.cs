@@ -88,7 +88,13 @@ public class LiteDbStorage : IStorage, IDisposable
         ConfigCollection.Upsert(c);
     }
 
-    public void Save(ttime.TimeEntry timeEntry) => TimeCollection.Upsert(new LiteDbTimeEntry(timeEntry));
+    public void Save(TimeEntry timeEntry, DateTime? newTime)
+    {
+        var dbRecord = TimeCollection.FindOne(e => e.Time == timeEntry.Time) ?? new LiteDbTimeEntry(timeEntry);
+        dbRecord.Entry = timeEntry;
+        dbRecord.Time = newTime ?? dbRecord.Time;
+        TimeCollection.Upsert(dbRecord);
+    }
 
     public IEnumerable<ttime.TimeEntry> ListTimeEntries(DateTime start, DateTime end)
     {
