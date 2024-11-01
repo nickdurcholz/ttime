@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace ttime;
 
-public class DateTimeUtility
+public static class DateTimeUtility
 {
     public static bool TryParseDateOffset(string offset, DateTime date, out DateTime result)
     {
@@ -53,8 +53,8 @@ public class DateTimeUtility
             case ReportingPeriod.Friday:
             case ReportingPeriod.Saturday:
             {
-                int targetDay = (int) period;
-                int currentDay = (int) today.DayOfWeek;
+                int targetDay = (int)period;
+                int currentDay = (int)today.DayOfWeek;
                 int offset = currentDay - targetDay;
                 if (offset < 1)
                     offset += 7;
@@ -62,15 +62,15 @@ public class DateTimeUtility
             }
             case ReportingPeriod.LastWeek:
             {
-                int targetDay = (int) startOfWeek;
-                int currentDay = (int) today.DayOfWeek;
+                int targetDay = (int)startOfWeek;
+                int currentDay = (int)today.DayOfWeek;
                 int offset = currentDay - targetDay;
                 return (today.AddDays(-offset - 7), today.AddDays(-offset));
             }
             case ReportingPeriod.Week:
             {
-                int targetDay = (int) startOfWeek;
-                int currentDay = (int) today.DayOfWeek;
+                int targetDay = (int)startOfWeek;
+                int currentDay = (int)today.DayOfWeek;
                 int offset = currentDay - targetDay;
                 return (today.AddDays(-offset), today.AddDays(-offset + 7));
             }
@@ -102,5 +102,13 @@ public class DateTimeUtility
             default:
                 throw new ArgumentOutOfRangeException(nameof(ReportingPeriod));
         }
+    }
+
+    public static readonly long Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks /
+                                        TimeSpan.TicksPerMillisecond;
+
+    public static long ToUnixTime(this DateTime dt)
+    {
+        return dt.ToUniversalTime().Ticks / TimeSpan.TicksPerMillisecond - Epoch;
     }
 }

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using CommandDotNet;
+using ttime.Backends;
 using ttime.Backends.LiteDb;
+using ttime.Backends.MongoDb;
 
 namespace ttime;
 
@@ -50,7 +52,7 @@ class Program
                 return 0;
             }
 
-            using var storage = new LiteDbStorage();
+            using var storage = CreateStorage();
             var configuration = new Configuration(storage);
             foreach (var c in AvailableCommands)
             {
@@ -94,6 +96,19 @@ class Program
             Console.Error.WriteLine(ex.Message);
             return 1;
         }
+    }
+
+    private static IStorage CreateStorage()
+    {
+        Enum.TryParse<TTimeBackend>(Environment.GetEnvironmentVariable("TTIME_BACKEND"), true, out var backend);
+        if (backend == TTimeBackend.Mongo)
+        {
+            var connectionString = Environment.GetEnvironmentVariable("TTIME_MONGO_CONNECTION");
+            var database = Environment.GetEnvironmentVariable("TTIME_MONGO_DATABASE") ?? "ttime";
+            return new MongoStorage(connectionString, database);
+        }
+
+        return new LiteDbStorage();
     }
 
     public static Command GetCommand(string action)

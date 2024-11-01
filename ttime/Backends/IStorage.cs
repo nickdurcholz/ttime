@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace ttime;
+namespace ttime.Backends;
 
-public interface IStorage
+public interface IStorage : IDisposable
 {
     IEnumerable<ConfigSetting> ListConfigSettings();
     void Save(ConfigSetting setting);
