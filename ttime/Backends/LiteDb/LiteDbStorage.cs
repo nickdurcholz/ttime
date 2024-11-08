@@ -142,12 +142,10 @@ public class LiteDbStorage : IStorage, IDisposable
         foreach (var entry in orderedEntries)
         {
             bool add = true;
-            while (i < existingEntries.Count)
+            for (var existing = i < existingEntries.Count ? existingEntries[i] : null;
+                 i < existingEntries.Count && existing!.Time <= entry.Time;
+                 i++)
             {
-                var existing = existingEntries[i];
-                if (existing.Time > entry.Time)
-                    break;
-                i++;
                 if (entry.Time == existing.Time)
                 {
                     existing.Entry = entry;
@@ -156,9 +154,11 @@ public class LiteDbStorage : IStorage, IDisposable
                     break;
                 }
             }
+
             if (add)
                 toSave.Add(new LiteDbTimeEntry(entry));
         }
+
         TimeCollection.Upsert(toSave);
     }
 
