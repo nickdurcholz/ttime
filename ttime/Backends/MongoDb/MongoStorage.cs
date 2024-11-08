@@ -69,8 +69,16 @@ public class MongoStorage : IStorage
 
     public void Save(IEnumerable<TimeEntry> entries)
     {
-        foreach (var e in entries)
-            Save(e);
+        TimeEntries.BulkWrite(entries.Select(e =>
+        {
+            var mongoEntry = new MongoTimeEntry(e);
+            return new ReplaceOneModel<MongoTimeEntry>(
+                Builders<MongoTimeEntry>.Filter.Eq("_id", mongoEntry._id),
+                mongoEntry)
+            {
+                IsUpsert = true
+            };
+        }));
     }
 
     public void Save(Alias alias)
