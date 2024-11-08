@@ -12,9 +12,7 @@ public class MongoAlias
         Alias = alias;
     }
 
-    public string _id => Name;
-
-    public string Name
+    public string _id
     {
         get => Alias.Name;
         set => Alias.Name = value;

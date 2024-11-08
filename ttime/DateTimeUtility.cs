@@ -111,4 +111,9 @@ public static class DateTimeUtility
     {
         return dt.ToUniversalTime().Ticks / TimeSpan.TicksPerMillisecond - Epoch;
     }
+
+    public static DateTime UnixTimeToLocalTime(long unixTime)
+    {
+        return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(unixTime).ToLocalTime();
+    }
 }

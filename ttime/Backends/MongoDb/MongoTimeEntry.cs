@@ -13,12 +13,10 @@ public class MongoTimeEntry
         _timeEntry = timeEntry;
     }
 
-    public long _id => Time.ToUnixTime();
-
-    public DateTime Time
+    public long _id
     {
-        get => _timeEntry.Time;
-        set => _timeEntry.Time = value;
+        get => _timeEntry.Time.ToUnixTime();
+        set => _timeEntry.Time = DateTimeUtility.UnixTimeToLocalTime(value);
     }
 
     public bool Stopped

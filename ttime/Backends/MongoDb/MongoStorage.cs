@@ -20,25 +20,11 @@ public class MongoStorage : IStorage
         _db = _client.GetDatabase(databaseName);
     }
 
-    public IMongoCollection<MongoTimeEntry> TimeEntries
-    {
-        get
-        {
-            if (_timeEntries == null)
-            {
-                _timeEntries = _db.GetCollection<MongoTimeEntry>("time");
-                _timeEntries.Indexes.CreateOne(new CreateIndexModel<MongoTimeEntry>(
-                                                   Builders<MongoTimeEntry>.IndexKeys.Ascending(a => a.Time),
-                                                   new CreateIndexOptions { Unique = true }));
-            }
-
-            return _timeEntries;
-        }
-    }
+    public IMongoCollection<MongoTimeEntry> TimeEntries => _timeEntries ??= _db.GetCollection<MongoTimeEntry>("time");
 
     public IMongoCollection<MongoConfigSetting> ConfigSettings
     {
-        get { return _configSettings ??= _db.GetCollection<MongoConfigSetting>("config_settings"); }
+        get => _configSettings ??= _db.GetCollection<MongoConfigSetting>("config_settings");
     }
 
     public IMongoCollection<MongoAlias> Aliases => _aliases ??= _db.GetCollection<MongoAlias>("aliases");
@@ -51,7 +37,7 @@ public class MongoStorage : IStorage
     public void Save(ConfigSetting setting)
     {
         ConfigSettings.ReplaceOne(
-            Builders<MongoConfigSetting>.Filter.Eq(x => x.Key, setting.Key),
+            Builders<MongoConfigSetting>.Filter.Eq(x => x._id, setting.Key),
             new MongoConfigSetting(setting),
             new ReplaceOptions { IsUpsert = true });
     }
@@ -84,38 +70,54 @@ public class MongoStorage : IStorage
     public void Save(Alias alias)
     {
         Aliases.ReplaceOne(
-            Builders<MongoAlias>.Filter.Eq(x => x.Name, alias.Name),
+            Builders<MongoAlias>.Filter.Eq(x => x._id, alias.Name),
             new MongoAlias(alias),
             new ReplaceOptions { IsUpsert = true });
     }
 
     public IEnumerable<TimeEntry> ListTimeEntries(DateTime start, DateTime end)
     {
-        return TimeEntries.Find(e => e.Time >= start && e.Time < end).ToEnumerable().Select(x => x.Entry);
+        var startUnixTime = start.ToUnixTime();
+        var endUnixTime = end.ToUnixTime();
+        return TimeEntries.Find(e => e._id >= startUnixTime && e._id < endUnixTime)
+                          .ToEnumerable()
+                          .Select(x => x.Entry);
     }
 
-    public TimeEntry GetNextEntry(TimeEntry entry) => TimeEntries.Find(e => e.Time >= entry.Time)
-                                                                 .SortBy(e => e.Time)
-                                                                 .FirstOrDefault()
-                                                                ?.Entry;
+    public TimeEntry GetNextEntry(TimeEntry entry)
+    {
+        var ut = entry.Time.ToUnixTime();
+        return TimeEntries.Find(e => e._id >= ut)
+                          .SortBy(e => e._id)
+                          .FirstOrDefault()
+                         ?.Entry;
+    }
 
     public void DeleteEntries(IList<DateTime> timestamp)
     {
         if (timestamp.Count == 0)
             return;
-        TimeEntries.DeleteMany(Builders<MongoTimeEntry>.Filter.In(x => x.Time, timestamp));
+        var ut = timestamp.Select(t => t.ToUnixTime());
+        TimeEntries.DeleteMany(Builders<MongoTimeEntry>.Filter.In(x => x._id, ut));
     }
 
     public IEnumerable<Alias> ListAliases() => Aliases.Find(Builders<MongoAlias>.Filter.Empty)
                                                       .ToEnumerable()
                                                       .Select(a => a.Alias);
 
-    public void Delete(Alias alias) => Aliases.DeleteOne(a => a.Name == alias.Name);
+    public void Delete(Alias alias) => Aliases.DeleteOne(a => a._id == alias.Name);
 
-    public TimeEntry this[DateTime timestamp] => TimeEntries.Find(e => e.Time == timestamp).FirstOrDefault()?.Entry;
+    public TimeEntry this[DateTime timestamp]
+    {
+        get
+        {
+            var ut = timestamp.ToUnixTime();
+            return TimeEntries.Find(e => e._id == ut).FirstOrDefault()?.Entry;
+        }
+    }
 
     public TimeEntry GetLastEntry(int offset) => TimeEntries.Find(FilterDefinition<MongoTimeEntry>.Empty)
-                                                            .SortByDescending(e => e.Time)
+                                                            .SortByDescending(e => e._id)
                                                             .Skip(offset)
                                                             .FirstOrDefault()
                                                            ?.Entry;

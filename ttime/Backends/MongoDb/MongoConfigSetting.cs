@@ -12,9 +12,7 @@ public class MongoConfigSetting
         _setting = setting;
     }
 
-    public string _id => Key;
-
-    public string Key
+    public string _id
     {
         get => _setting.Key;
         set => _setting.Key = value;
