@@ -32,6 +32,7 @@ public class LiteDbTimeEntry
         set => _timeEntry.Tags = value;
     }
 
+    [BsonIgnore]
     public ttime.TimeEntry Entry
     {
         get => _timeEntry;

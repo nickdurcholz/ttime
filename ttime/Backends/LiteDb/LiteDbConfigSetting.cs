@@ -25,6 +25,7 @@ public class LiteDbConfigSetting
         set => _setting.Value = value;
     }
 
+    [BsonIgnore]
     public ConfigSetting Setting
     {
         get => _setting;

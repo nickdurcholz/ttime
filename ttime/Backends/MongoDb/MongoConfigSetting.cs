@@ -1,3 +1,5 @@
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace ttime.Backends.MongoDb;
 
 public class MongoConfigSetting
@@ -24,6 +26,7 @@ public class MongoConfigSetting
         set => _setting.Value = value;
     }
 
+    [BsonIgnore]
     public ConfigSetting Setting
     {
         get => _setting;

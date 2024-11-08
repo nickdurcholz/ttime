@@ -1,4 +1,5 @@
 using System;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace ttime.Backends.MongoDb;
 
@@ -32,6 +33,7 @@ public class MongoTimeEntry
         set => _timeEntry.Tags = value;
     }
 
+    [BsonIgnore]
     public ttime.TimeEntry Entry
     {
         get => _timeEntry;

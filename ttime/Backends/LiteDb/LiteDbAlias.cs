@@ -26,6 +26,7 @@ public class LiteDbAlias
         set => _alias.Args = value;
     }
 
+    [BsonIgnore]
     public Alias Alias
     {
         get => _alias;

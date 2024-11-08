@@ -26,7 +26,7 @@ public class MongoStorage : IStorage
         {
             if (_timeEntries == null)
             {
-                _timeEntries = _db.GetCollection<MongoTimeEntry>("ttime");
+                _timeEntries = _db.GetCollection<MongoTimeEntry>("time");
                 _timeEntries.Indexes.CreateOne(new CreateIndexModel<MongoTimeEntry>(
                                                    Builders<MongoTimeEntry>.IndexKeys.Ascending(a => a.Time),
                                                    new CreateIndexOptions { Unique = true }));
@@ -38,7 +38,7 @@ public class MongoStorage : IStorage
 
     public IMongoCollection<MongoConfigSetting> ConfigSettings
     {
-        get { return _configSettings ??= _db.GetCollection<MongoConfigSetting>("config-settings"); }
+        get { return _configSettings ??= _db.GetCollection<MongoConfigSetting>("config_settings"); }
     }
 
     public IMongoCollection<MongoAlias> Aliases => _aliases ??= _db.GetCollection<MongoAlias>("aliases");

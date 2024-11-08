@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace ttime.Backends.MongoDb;
 
@@ -25,5 +26,6 @@ public class MongoAlias
         set => Alias.Args = value;
     }
 
+    [BsonIgnore]
     public Alias Alias { get; set; }
 }
