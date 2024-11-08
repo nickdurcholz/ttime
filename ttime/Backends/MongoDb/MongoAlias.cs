@@ -1,34 +1,29 @@
 using System.Collections.Generic;
-using MongoDB.Bson;
 
 namespace ttime.Backends.MongoDb;
 
 public class MongoAlias
 {
-    private Alias _alias;
     public MongoAlias() : this(new Alias()) { }
+
     public MongoAlias(Alias alias)
     {
-        _alias = alias;
+        Alias = alias;
     }
 
-    public ObjectId _id { get; set; }
+    public string _id => Name;
 
     public string Name
     {
-        get => _alias.Name;
-        set => _alias.Name = value;
+        get => Alias.Name;
+        set => Alias.Name = value;
     }
 
     public List<string> Args
     {
-        get => _alias.Args;
-        set => _alias.Args = value;
+        get => Alias.Args;
+        set => Alias.Args = value;
     }
 
-    public Alias Alias
-    {
-        get => _alias;
-        set => _alias = value;
-    }
+    public Alias Alias { get; set; }
 }

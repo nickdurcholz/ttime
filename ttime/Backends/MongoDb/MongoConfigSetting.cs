@@ -1,18 +1,16 @@
-
-using MongoDB.Bson;
-
 namespace ttime.Backends.MongoDb;
 
 public class MongoConfigSetting
 {
     private ConfigSetting _setting;
     public MongoConfigSetting() : this(new ConfigSetting()) { }
+
     public MongoConfigSetting(ConfigSetting setting)
     {
         _setting = setting;
     }
 
-    public ObjectId _id { get; set; }
+    public string _id => Key;
 
     public string Key
     {
