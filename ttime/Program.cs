@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CommandDotNet;
 using ttime.Backends;
 using ttime.Backends.LiteDb;
 using ttime.Backends.MongoDb;
@@ -25,19 +24,6 @@ class Program
         new UpgradeDbCommand(),
         new EditCommand(),
     };
-
-    [Subcommand] public HelpCommand HelpCommand { get; set; }
-    [Subcommand] public StartCommand StartCommand { get; set; }
-    [Subcommand] public StopCommand StopCommand { get; set; }
-    [Subcommand] public ReportCommand ReportCommand { get; set; }
-    [Subcommand] public ConfigCommand ConfigCommand { get; set; }
-    [Subcommand] public ImportCommand ImportCommand { get; set; }
-    [Subcommand] public ExportCommand ExportCommand { get; set; }
-    [Subcommand] public AliasCommand AliasCommand { get; set; }
-    [Subcommand] public RemoveCommand RemoveCommand { get; set; }
-    [Subcommand] public StopTimeCommand StopTimeCommand { get; set; }
-    [Subcommand] public UpgradeDbCommand UpgradeDbCommand { get; set; }
-    [Subcommand] public EditCommand EditCommand { get; set; }
 
     static int Main(string[] args)
     {
