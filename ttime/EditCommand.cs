@@ -19,13 +19,8 @@ public class EditCommand : Command
         {
             if (DateTime.TryParse(arg, out var t) || DateTimeUtility.TryParseDateOffset(arg, DateTime.Now, out t))
             {
-                if (!id.HasValue)
+                if (!id.HasValue && !offset.HasValue)
                 {
-                    if (offset.HasValue)
-                    {
-                        Error.WriteLine($"You may not specify both a timestamp and an offset");
-                        error = true;
-                    }
                     id = t;
                 }
                 else if (time.HasValue)

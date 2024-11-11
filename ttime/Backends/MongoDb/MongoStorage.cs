@@ -44,11 +44,20 @@ public class MongoStorage : IStorage
 
     public void Save(TimeEntry timeEntry, DateTime? newTime = null)
     {
-        var id = timeEntry.Time.ToUnixTime();
-        if (newTime != null) timeEntry.Time = newTime.Value;
-        var result = TimeEntries.ReplaceOne(
-            Builders<MongoTimeEntry>.Filter.Eq(x => x._id, id),
-            new MongoTimeEntry(timeEntry),
+        var mongoTimeEntry = new MongoTimeEntry(timeEntry);
+        if (newTime != null && newTime.Value != timeEntry.Time)
+        {
+            if (TimeEntries.CountDocuments(Builders<MongoTimeEntry>.Filter.Eq(x => x._id, mongoTimeEntry._id)) > 0)
+                throw new TTimeError("There is already an entry with the same time.");
+
+            var id = timeEntry.Time.ToUnixTime();
+            TimeEntries.DeleteOne(Builders<MongoTimeEntry>.Filter.Eq(x => x._id, id));
+            timeEntry.Time = newTime.Value;
+        }
+
+        TimeEntries.ReplaceOne(
+            Builders<MongoTimeEntry>.Filter.Eq(x => x._id, mongoTimeEntry._id),
+            mongoTimeEntry,
             new ReplaceOptions { IsUpsert = true }
         );
     }
