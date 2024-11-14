@@ -44,6 +44,7 @@ public class Configuration
         Enum.TryParse(GetSetting(DefaultExportFormatKey, nameof(ExportFormat.Csv)), true, out _defaultExportFormat);
         Enum.TryParse(GetSetting(StartOfWeekKey, nameof(DayOfWeek.Monday)), true, out _startOfWeek);
         Enum.TryParse(GetSetting(TimeFormatKey, nameof(TimeFormat.DecimalHours)), true, out _timeFormat);
+        int.TryParse(GetSetting(HoursPerWeekKey, "40"), out _hoursPerWeek);
         decimal.TryParse(GetSetting(RoundingKey, "0"), out _roundingPrecision);
 
         Aliases = storage.ListAliases().ToList();

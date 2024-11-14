@@ -49,7 +49,7 @@ public class StopTimeCommand : Command
         var report = calculator.CreateReport();
 
         hours -= report.Single().Hours;
-        return hours;
+        return Math.Max(0, hours);
     }
 
     public override void PrintUsage()

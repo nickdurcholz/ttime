@@ -96,7 +96,7 @@ public class MongoStorage : IStorage
     public TimeEntry GetNextEntry(TimeEntry entry)
     {
         var ut = entry.Time.ToUnixTime();
-        return TimeEntries.Find(e => e._id >= ut)
+        return TimeEntries.Find(e => e._id > ut)
                           .SortBy(e => e._id)
                           .FirstOrDefault()
                          ?.Entry;
