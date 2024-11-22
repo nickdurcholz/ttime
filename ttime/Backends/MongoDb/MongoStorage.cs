@@ -47,7 +47,10 @@ public class MongoStorage : IStorage
         var mongoTimeEntry = new MongoTimeEntry(timeEntry);
         if (newTime != null && newTime.Value != timeEntry.Time)
         {
-            if (TimeEntries.CountDocuments(Builders<MongoTimeEntry>.Filter.Eq(x => x._id, mongoTimeEntry._id)) > 0)
+            var docCount = TimeEntries.CountDocuments(
+                Builders<MongoTimeEntry>.Filter.Eq(x => x._id, newTime.Value.ToUnixTime())
+            );
+            if (docCount > 0)
                 throw new TTimeError("There is already an entry with the same time.");
 
             var id = timeEntry.Time.ToUnixTime();
