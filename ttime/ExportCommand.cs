@@ -25,7 +25,25 @@ public class ExportCommand : Command
         for (var i = 0; i < args.Length; i++)
         {
             var arg = args[i];
-            if (Enum.TryParse<ReportingPeriod>(arg, true, out var p))
+            if (string.IsNullOrEmpty(arg))
+                continue;
+
+            if (int.TryParse(arg, out var year) && year > 0)
+            {
+                if (periodFound)
+                {
+                    Error.WriteLine("Multiple date ranges were specified. Please specify a single date or date range.");
+                    valid = false;
+                    continue;
+                }
+
+                period = ReportingPeriod.Custom;
+                periodFound = true;
+
+                fromDate = new DateTime(year, 1, 1);
+                toDate = new DateTime(year + 1, 1, 1);
+            }
+            else if (Enum.TryParse<ReportingPeriod>(arg, true, out var p))
             {
                 if (periodFound)
                 {
@@ -38,8 +56,7 @@ public class ExportCommand : Command
                 periodFound = true;
                 continue;
             }
-
-            if (arg.StartsWith("from="))
+            else if (arg.StartsWith("from="))
             {
                 if (periodFound && toDate != default)
                 {
@@ -195,7 +212,7 @@ public class ExportCommand : Command
     public override void PrintUsage()
     {
         Out.WriteLine("usage: ttime export [day-of-week | last-week | yesterday | today |");
-        Out.WriteLine("                    date | week | all | from=<date-time>");
+        Out.WriteLine("                    date | week | all | <year> | from=<date-time>");
         Out.WriteLine("                    [to=<date-time>]] [format=text|csv|xml|json]");
         Out.WriteLine("                    [out=<file>] [<tag>...]");
         Out.WriteLine();

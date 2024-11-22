@@ -28,7 +28,22 @@ public class ReportCommand : Command
         for (var i = 0; i < args.Length; i++)
         {
             var arg = args[i];
-            if (!periodFound)
+            if (int.TryParse(arg, out var year) && year > 0)
+            {
+                if (periodFound)
+                {
+                    Error.WriteLine($"Invalid reporting period {year}. Please specify a single date or date range.");
+                    valid = false;
+                    continue;
+                }
+
+                period = ReportingPeriod.Custom;
+                periodFound = true;
+
+                fromDate = new DateTime(year, 1, 1);
+                toDate = new DateTime(year + 1, 1, 1);
+            }
+            else if (!periodFound)
             {
                 periodFound = Enum.TryParse(arg, true, out period);
                 if (periodFound) continue;
@@ -38,11 +53,9 @@ public class ReportCommand : Command
                 {
                     toDate = fromDate.Date.AddDays(1);
                     period = ReportingPeriod.Custom;
-                    continue;
                 }
             }
-
-            if (arg.StartsWith("from="))
+            else if (arg.StartsWith("from="))
             {
                 if (arg.Length == 5)
                 {
@@ -272,7 +285,7 @@ public class ReportCommand : Command
     public override void PrintUsage()
     {
         Out.WriteLine("usage: ttime report [<day-of-week> | lastWeek | yesterday | today |");
-        Out.WriteLine("                    <date> | week | all | from=<date-time>");
+        Out.WriteLine("                    <date> | week | all | <year> | from=<date-time>");
         Out.WriteLine("                    [to=<date-time>]]");
         Out.WriteLine("                    [format=text|CsvSimple|CsvRollup|xml|json]");
         Out.WriteLine("                    [n=3] [daily=y|n] [out=<file>] [round=x] ");
