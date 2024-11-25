@@ -53,9 +53,11 @@ public class ReportCommand : Command
                 {
                     toDate = fromDate.Date.AddDays(1);
                     period = ReportingPeriod.Custom;
+                    continue;
                 }
             }
-            else if (arg.StartsWith("from="))
+
+            if (arg.StartsWith("from="))
             {
                 if (arg.Length == 5)
                 {
