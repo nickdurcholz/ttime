@@ -9,16 +9,18 @@ public class TextExportFormatter : IExportFormatter
     {
         foreach (var entry in entries)
         {
-            @out.Write(entry.Time.ToString("s"));
+            @out.Write(entry.Time.ToString("O"));
             @out.Write("  ");
             if (entry.Stopped)
+            {
                 @out.Write("Stopped");
+            }
             else
                 for (var i = 0; i < entry.Tags.Length; i++)
                 {
                     @out.Write(entry.Tags[i]);
                     if (i != entry.Tags.Length - 1)
-                        @out.Write(", ");
+                        @out.Write(' ');
                 }
 
             @out.WriteLine();
